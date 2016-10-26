@@ -4,18 +4,17 @@
 //     ranking: 129,
 //     credits: 14
 // }
-function Schedule(allClasses) {
-    this.allClasses = allClasses;
+function Schedule() {
     this.classes = new ClassList();
     this.ranking = 0;
     this.credits = 0;
 
-    this.addClass = function(classID) {
-        this.classes.add(classID);
+    this.addClass = function(classObj) {
+        this.classes.add(classObj);
     }
 
-    this.removeClass = function(classID) {
-        this.classes.remove(classID);
+    this.removeClass = function(classObj) {
+        this.classes.remove(classObj.id);
     }
 
     this.calculateRanking = function(options) {
@@ -25,16 +24,15 @@ function Schedule(allClasses) {
         return this.ranking;
     };
     this.calculateCredits = function() {
-        var credits = 0;
-        this.classes.each(function(theClass) {
-            credits += allClasses.get(theClass).credits;
-        });
-        this.credits = credits;
-        return credits;
+        this.credits = 0;
+        for (var i = 0; i < this.classes.getLength(); i++) {
+            this.credits += this.classes.at(i).credits;
+        }
+        return this.credits;
     };
 
     this.copy = function() {
-        var copySchedule = new Schedule(this.allClasses);
+        var copySchedule = new Schedule();
         copySchedule.classes = this.classes.copy();
         return copySchedule;
     };
@@ -62,7 +60,7 @@ function Schedule(allClasses) {
 function Class(
         id, number, name, credits, times, professor,
         campus, building, room, seatsMax, seatsLeft,
-        preReqs, coReqs, electiveGroup,
+        preReqs, coReqs, electivesInGroup,
         color) {
     // primary data about class
     this.id = id;
@@ -79,15 +77,17 @@ function Class(
     this.seatsMax = seatsMax;
     this.seatsLeft = seatsLeft;
 
-    // data about pre-/co-/post-requisites
+    // data about pre-/co-/post-requisites and electives
     this.preReqs = preReqs;
     this.coReqs = coReqs;
-    this.electiveGroup = electiveGroup;
+    this.electivesInGroup = electivesInGroup;
 
     // data about the appearance of the class blocks
     this.color = color;
 }
 // classbuilder?
+
+// TODO: add Course class
 
 // list of classes with easy accessors/manipulators
 function ClassList() {
@@ -113,22 +113,36 @@ function ClassList() {
         return (ind > -1) ? this._classes[ind] : null;
     };
 
+    this.at = function(ind) {
+        return this._classes[ind];
+    };
+
     this.remove = function(classID) {
         var ind = this.getInd(classID);
         if (ind > -1) {
-            this._classes.splice(i, 1);
+            this.removeAt(ind);
         }
     };
 
-    this.each = function(func) {
-        if (typeof func !== "function") {
-            console.error("Invalid Argument: callback must" +
-                " be a function, not a " + typeof func);
-            return;
-        }
+    this.removeAt = function(ind) {
+        this._classes.splice(ind, 1);
+    };
+
+    this.moveToFront = function(ind) {
+        this._classes.unshift(this._classes.splice(ind, 1)[0]);
+    };
+
+    this.getLastItem = function() {
+        return this._classes[this._classes.length - 1];
+    };
+
+    this.exists = function(classID) {
         for (var i = 0; i < this._classes.length; i++) {
-            func(this._classes[i]);
+            if (this._classes[i].id == classID) {
+                return true;
+            }
         }
+        return false;
     };
 
     this.copy = function() {
@@ -141,7 +155,19 @@ function ClassList() {
         return this._classes.length;
     };
 
-    // TODO: use binary search/insert to speed things up a bit
+    this.toString = function() {
+        var str = "[";
+        for (var i = 0; i < this._classes.length; i++) {
+            str += "Class{id:" + this._classes[i].id + "}";
+            if (i < this._classes.length - 1) {
+                str += ", ";
+            }
+        }
+        return str + "]";
+    };
+
+    // TODO: consider using binary search/insert to speed things up a bit
+    // May not be possible now with moveToFront()...
 }
 
 // Calculate how many other classes depend on each class
@@ -174,6 +200,13 @@ function Time(day, startH, startM, endH, endM) {
         h: endH,
         m: endM
     };
+    this.toString = function() {
+        return DAYS[this.day] + ": " +
+            ("0" + this.start.h).slice(-2) +
+            ("0" + this.start.m).slice(-2) + "-" +
+            ("0" + this.end.h).slice(-2) +
+            ("0" + this.end.m).slice(-2);
+    };
 }
 
 // electiveGroups:
@@ -181,24 +214,30 @@ function Time(day, startH, startM, endH, endM) {
 //     [0, 1, 2, 3],
 //     ...
 // ]
-function ElectiveGroups() {
-    this.groups = [];
-    this.newGroup = function() {
-        this.groups.push([]);
-        return this.groups.length - 1;
-    };
-    this.addClassToGroup = function(groupID, classID) {
-        this.groups[groupID].push(classID);
-    };
-    this.groupIDForClass = function(classID) {
-        for (var i = 0; i < this.groups.length; i++) {
-            if (this.groups[i].indexOf(classID) > -1) {
-                return i;
-            }
-        }
-        return -1;
-    };
-}
+// function ElectiveGroups() {
+//     this.groups = [];
+//     this.newGroup = function() {
+//         this.groups.push([]);
+//         return this.groups.length - 1;
+//     };
+//     this.addClassToGroup = function(groupInd, classID) {
+//         this.groups[groupInd].push(classID);
+//     };
+//     this.groupIDForClassID = function(classID) {
+//         for (var i = 0; i < this.groups.length; i++) {
+//             if (this.groups[i].indexOf(classID) > -1) {
+//                 return i;
+//             }
+//         }
+//         return -1;
+//     };
+//     this.at = function(groupInd) {
+//         return this.groups[groupInd];
+//     };
+//     this.getLength = function() {
+//         return this.groups.length;
+//     };
+// }
 
 // options:
 // {
@@ -309,7 +348,7 @@ function Options() {
         this.hideFullClasses = hide;
     };
 
-    this.allowHalfCoRequisites = true;
+    this.allowHalfCoRequisites = false;
     this.setAllowHalfCoRequisites = function(allow) {
         this.allowHalfCoRequisites = allow;
     };
@@ -318,9 +357,9 @@ function Options() {
 
     //credit range: closer = favored, further = neutral
     this.getCreditsPreference = function(credits) {
-        if (credits < range.minValue ||
-            credits > range.maxValue) return pref.unacceptable;
-        if (credits == range.favoredValue) return pref.favored;
+        if (credits < this.creditRange.minValue ||
+            credits > this.creditRange.maxValue) return pref.unacceptable;
+        if (credits == this.creditRange.favoredValue) return pref.favored;
         return pref.neutral;
     };
 }

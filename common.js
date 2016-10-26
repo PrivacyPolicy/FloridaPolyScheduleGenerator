@@ -1,5 +1,7 @@
+const DEBUG = !!!!!!!true;
+
 // days:
-const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 // pref (of preferrence setting):
 var pref = {

@@ -2,7 +2,7 @@ function ScheduleGenerator(
         classes, options,
         preProcessFilter, processFilter, postProcessFilter) {
     this.all_classes = classes;
-    this.classes = null;//classes.copy();
+    this.classes = null;
     this.options = options;
 
     this.preProcessFilter = preProcessFilter;
@@ -10,6 +10,7 @@ function ScheduleGenerator(
     this.postProcessFilter = postProcessFilter;
 
     this.schedules = [];
+    this.calculationTime = 0;
     this.collisionMatrix = null;
 
     // get how many schedules there are
@@ -17,36 +18,48 @@ function ScheduleGenerator(
         return this.schedules.length;
     };
 
+    // get how long the last calculation took
+    this.getCalculationTime = function() {
+        return this.calculationTime;
+    }
+
     // user-friendly code to start the calculations
     this.generateSchedules = function() {
         // TODO: put this code in a JS Worker
-        var buildSchedule = new Schedule(this.all_classes);
+        this.calculationTime = Date.now();
+        var buildSchedule = new Schedule();
         this.schedules = [];
         this.preProcessClasses();
         // (Dynamic Programming) used to remember previous
         // calculations when two classes didn't work before
         this.collisionMatrix =
-            new SymmetricMatrix(this.classes.getLength(), 0);
-        this.recGenerateSchedules(buildSchedule, 0);
+            new SymmetricMatrix(this.all_classes.getLength(), 0);
+        // start with each of the classes
+        for (var i = 0; i < this.classes.getLength(); i++) {
+            this.recGenerateSchedules(buildSchedule, i);
+        }
         this.postProcessSchedules();
+        this.calculationTime = (Date.now() - this.calculationTime) / 1000;
         return this.schedules;
     };
 
     // remove any classes that would never work in the first place
     this.preProcessClasses = function() {
         this.classes = this.all_classes.copy();
-        var classes = this.classes._classes;
-        for (var i = classes.length - 1; i >= 0; i--) {
-            if (!this.preProcessFilter(classes[i])) {
-                classes.splice(i, 1);
+        for (var i = this.classes.getLength() - 1; i >= 0; i--) {
+            if (!this.preProcessFilter(this.classes.at(i))) {
+                this.classes.removeAt(i);
             }
         }
         // sort with must-have classes first to find those
         // collisions fastest (reduces computation time)
-        for (var i = classes.length - 1; i >= 0; i--) {
-            if (this.options.classesRequired.indexOf(classes[i].id) > -1) {
+        var lastInd = 0;
+        for (var i = this.classes.getLength() - 1; i >= lastInd; i--) {
+            if (this.options.classesRequired.indexOf(
+                    this.classes.at(i).id) > -1) {
                 // move to the start of the array
-                classes.unshift(classes.splice(i, 1)[0]);
+                this.classes.moveToFront(i);
+                lastInd++;
             }
         }
     };
@@ -67,15 +80,15 @@ function ScheduleGenerator(
 
     // the core of this API, the recursive-backtracking
     // function that generates the schedules
-    this.recGenerateSchedules = function(buildSchedule, classID) {
+    this.recGenerateSchedules = function(buildSchedule, classInd) {
         if (this.isCompleteSchedule(buildSchedule)) {
-            this.schedules.push(buildSchedule);
+            this.schedules.push(buildSchedule.copy());
         }
-        for (var i = classID + 1; i < this.classes._classes.length; i++) {
+        for (var i = classInd; i < this.classes.getLength(); i++) {
             if (this.nextStepIsValid(buildSchedule, i)) {
                 this.addClass(buildSchedule, i);
                 // recursive call:
-                this.recGenerateSchedules(buildSchedule, i);
+                this.recGenerateSchedules(buildSchedule, i + 1);
                 this.removeClass(buildSchedule, i);
             }
         }
@@ -85,92 +98,89 @@ function ScheduleGenerator(
 
     // if the overall schedule is valid
     this.isCompleteSchedule = function(schedule) {
-        return postProcessFilter(this.classes, schedule);
+        return postProcessFilter(schedule);
     };
 
     // if, upon adding this class, the schedule wouldn't be invalid
-    this.nextStepIsValid = function(schedule, classID) {
-        // determine if there's collision using the collision
-        // matrix (Dynamic Programming)
-        // var collision = collType.unknown;
-        // for (var i = 0; i < schedule.classes.length; i++) {
-        //     for (var j = i + 1; j < schedule.classes.length; j++) {
-        //         var row = schedule.classes[i].classID;
-        //         var col = schedule.classes[j].classID;
-        //         var collision = this.collisionMatrix.get(row, col);
-        //         if (collision == collType.collision) {
-        //             // we already calculated collision
-        //             return false;
-        //         } else if (collision == collType.unknown) {
-        //             // uncalculated; do so now
-        //             collision = this.checkCollision(
-        //                 this.clients[row].times,
-        //                 this.clients[col].times);
-        //             this.collisionMatrix.set(row, col, collision);
-        //             if (collision == collType.collision) return false;
-        //         }
-        //         // else, compatible (no collision); move on
-        //     }
-        // }
-        var collision = collType.unknown;
-        schedule.classes.each(function(row) {
-            if (collision == collType.collision) return;
-            schedule.classes.each(function(col) {
-                if (collision == collType.collision) return;
-                var rowID = schedule.classes.getInd(row.id);
-                var colID = schedule.classes.getInd(col.id);
-                var collision = this.collisionMatrix.get(row, col);
-                if (collision == collType.collision) {
-                    // we already calculated collision
-                    return;
-                    //return false;
-                } else if (collision == collType.unknown) {
-                    // uncalculated; do so now
-                    collision = this.checkCollision(
-                        this.clients[row].times,
-                        this.clients[col].times);
-                    this.collisionMatrix.set(row, col, collision);
-                    if (collision == collType.collision) return;
-                }
-                // else, compatible (no collision); move on
-            });
-        });
-        if (collision == collType.collision) {
-            return false;
-        }
+    this.nextStepIsValid = function(schedule, classInd) {
         // add class to a copied schedule
-        //var copy = new Schedule(schedule.classes.copy());
-        var copy = schedule.copy();
-        console.log(schedule);
-        this.addClass(copy, classID);
-        return processFilter(this.classes, copy);
+        var scheduleCopy = schedule.copy();
+        this.addClass(scheduleCopy, classInd);
+        // determine if there's collision on the new class using the
+        // collision matrix (Dynamic Programming) or just by calculating
+
+        var lastInd = scheduleCopy.classes.getLength() - 1;
+        var lastID = scheduleCopy.classes.at(lastInd).id;
+        // the location of the class with id in all_classes
+        var allInd_lastInd = this.all_classes.getInd(lastID);
+        for (var i = 0; i < lastInd; i++) {
+            var iID = scheduleCopy.classes.at(i).id;
+            var allInd_i = this.all_classes.getInd(iID);
+            var collision =
+                this.collisionMatrix.get(allInd_i, allInd_lastInd);
+            if (collision == collType.collision) {
+                // we already calculated collision before
+                return false;
+            } else if (collision == collType.unknown) {
+                // uncalculated; calculate and store the answer
+                collision = this.checkCollision(
+                    scheduleCopy.classes.at(i).times,
+                    scheduleCopy.classes.at(lastInd).times);
+                this.collisionMatrix.set(allInd_i, allInd_lastInd, collision);
+                if (collision == collType.collision) return false;
+            }
+            // else, compatible (no collision); move on
+        }
+        // Using no collision matrix: test and see if it's even worth it
+        // for (var i = 0; i < lastInd; i++) {
+        //     var collision = this.checkCollision(
+        //         scheduleCopy.classes.at(i).times,
+        //         scheduleCopy.classes.at(lastInd).times);
+        //     if (collision == collType.collision) return false;
+        // }
+        return processFilter(scheduleCopy);
     };
 
     // add the class to the schedule's class list
-    this.addClass = function(schedule, classID) {
-        schedule.addClass(classID);
+    this.addClass = function(schedule, classInd) {
+        var theClass = this.classes.at(classInd);
+        if (theClass == null) {
+            console.error("Invalid schedule class index: " + classInd);
+            return;
+        } else {
+            schedule.addClass(theClass);
+        }
     };
 
     // remove the class from the schedule's class list
-    this.removeClass = function(schedule, classID) {
-        schedule.removeClass(classID);
+    this.removeClass = function(schedule, classInd) {
+        schedule.removeClass(this.classes.at(classInd));
     };
 
     // compute if there's collision between two classes' times
     this.checkCollision = function(aTimes, bTimes) {
+        try {
+            aTimes[0].start.h;
+        } catch (e) {
+            console.error("checkCollision: either a non-Time object was "
+                + "given or the time values don't exist");
+            return collType.unknown;
+        }
         for (var i = 0; i < aTimes.length; i++) {
             for (var j = 0; j < bTimes.length; j++) {
                 var aStart = aTimes[i].start.h * 100 + aTimes[i].start.m;
                 var aEnd = aTimes[i].end.h * 100 + aTimes[i].end.m;
                 var bStart = bTimes[j].start.h * 100 + bTimes[j].start.m;
                 var bEnd = bTimes[j].end.h * 100 + bTimes[j].end.m;
-                if (aTimes.day == bTimes.day &&
-                        aEnd > bStart && aStart < bEnd) {
-                    return collTypes.collision;
+                if (aTimes[i].day == bTimes[j].day) {
+                    if ((aEnd > bStart && aStart < bEnd) ||
+                        (aStart < bEnd && aEnd > bStart)) {
+                        return collType.collision;
+                    }
                 }
             }
         }
-        return collTypes.compatible;
+        return collType.compatible;
     };
 }
 
