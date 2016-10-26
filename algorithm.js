@@ -21,7 +21,7 @@ function ScheduleGenerator(
     // get how long the last calculation took
     this.getCalculationTime = function() {
         return this.calculationTime;
-    }
+    };
 
     // user-friendly code to start the calculations
     this.generateSchedules = function() {
@@ -34,9 +34,14 @@ function ScheduleGenerator(
         // calculations when two classes didn't work before
         this.collisionMatrix =
             new SymmetricMatrix(this.all_classes.getLength(), 0);
-        // start with each of the classes
-        for (var i = 0; i < this.classes.getLength(); i++) {
-            this.recGenerateSchedules(buildSchedule, i);
+        // Don't bother calculating schedules where a required class
+        // isn't in the schedule
+        if (options.classesRequired.length > 0) {
+            this.recGenerateSchedules(buildSchedule, 0);
+        } else {
+            for (var i = 0; i < this.classes.getLength(); i++) {
+                this.recGenerateSchedules(buildSchedule, i);
+            }
         }
         this.postProcessSchedules();
         this.calculationTime = (Date.now() - this.calculationTime) / 1000;

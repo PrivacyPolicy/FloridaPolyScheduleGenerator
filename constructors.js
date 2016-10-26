@@ -11,11 +11,11 @@ function Schedule() {
 
     this.addClass = function(classObj) {
         this.classes.add(classObj);
-    }
+    };
 
     this.removeClass = function(classObj) {
         this.classes.remove(classObj.id);
-    }
+    };
 
     this.calculateRanking = function(options) {
         // TODO: implement a formula to determine ranking
