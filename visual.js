@@ -24,7 +24,7 @@ function displayClass(theClass, offset) {
             + offset * hourHeight * (endHour - startHour);
         var bottom = (time.end.h + (time.end.m / 60) - startHour) * hourHeight
             + offset * hourHeight * (endHour - startHour);
-        displayBlock(left, top, right, bottom, theClass.name);
+        displayBlock(left, top, right, bottom, theClass.course.name);
     }
 }
 

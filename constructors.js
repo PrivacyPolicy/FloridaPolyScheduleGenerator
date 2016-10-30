@@ -26,7 +26,7 @@ function Schedule() {
     this.calculateCredits = function() {
         this.credits = 0;
         for (var i = 0; i < this.classes.getLength(); i++) {
-            this.credits += this.classes.at(i).credits;
+            this.credits += this.classes.at(i).course.credits;
         }
         return this.credits;
     };
@@ -58,17 +58,14 @@ function Schedule() {
 //     electiveGroup: -1,
 // }
 function Class(
-        id, number, name, credits, times, professor,
-        campus, building, room, seatsMax, seatsLeft,
-        preReqs, coReqs, electivesInGroup,
-        color) {
+        id, course, times, professor, section,
+        campus, building, room, seatsMax, seatsLeft) {
     // primary data about class
     this.id = id;
-    this.number = number;
-    this.name = name;
-    this.credits = credits;
+    this.course = course;
     this.times = times;
     this.professor = professor;
+    this.section = section;
 
     // data about physical location
     this.campus = campus;
@@ -76,8 +73,19 @@ function Class(
     this.room = room;
     this.seatsMax = seatsMax;
     this.seatsLeft = seatsLeft;
+}
 
-    // data about pre-/co-/post-requisites and electives
+function Course(
+        id, number, name, credits,
+        preReqs, coReqs, electivesInGroup,
+        color) {
+    // primary data about course
+    this.id = id;
+    this.number = number;
+    this.name = name;
+    this.credits = credits;
+
+    // data about pre-/co-post-requisites and electives
     this.preReqs = preReqs;
     this.coReqs = coReqs;
     this.electivesInGroup = electivesInGroup;
@@ -85,9 +93,6 @@ function Class(
     // data about the appearance of the class blocks
     this.color = color;
 }
-// classbuilder?
-
-// TODO: add Course class
 
 // list of classes with easy accessors/manipulators
 function ClassList() {
@@ -269,9 +274,9 @@ function Time(day, startH, startM, endH, endM) {
 //     hideOtherMajors: true
 // }
 function Options() {
-    this.classesRequired = [];
-    this.classesFavored = [];
-    this.classesUnfavored = [];
+    this.coursesRequired = [];
+    this.coursesFavored = [];
+    this.coursesUnfavored = [];
     this.creditRange = { // default: between 1-20, ideally 15
         minValue: 1,
         maxValue: 20,
@@ -293,13 +298,13 @@ function Options() {
     this.professors = {};
 
     // functions
-    this.setClassPreference = function(classID, preferrence) {
+    this.setCoursePreference = function(classID, preferrence) {
         if (preferrence == pref.favored) {
-            this.classesFavored.push(classID);
+            this.coursesFavored.push(classID);
         } else if (preferrence == pref.unfavored) {
-            this.classesUnfavored.push(classID);
+            this.coursesUnfavored.push(classID);
         } else if (preferrence == pref.required) {
-            this.classesRequired.push(classID);
+            this.coursesRequired.push(classID);
         }
     }
     this.setCreditMin = function(value) {

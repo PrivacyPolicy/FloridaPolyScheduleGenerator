@@ -36,7 +36,7 @@ function ScheduleGenerator(
             new SymmetricMatrix(this.all_classes.getLength(), 0);
         // Don't bother calculating schedules where a required class
         // isn't in the schedule
-        if (options.classesRequired.length > 0) {
+        if (options.coursesRequired.length > 0) {
             this.recGenerateSchedules(buildSchedule, 0);
         } else {
             for (var i = 0; i < this.classes.getLength(); i++) {
@@ -60,8 +60,8 @@ function ScheduleGenerator(
         // collisions fastest (reduces computation time)
         var lastInd = 0;
         for (var i = this.classes.getLength() - 1; i >= lastInd; i--) {
-            if (this.options.classesRequired.indexOf(
-                    this.classes.at(i).id) > -1) {
+            if (this.options.coursesRequired.indexOf(
+                    this.classes.at(i).course.id) > -1) {
                 // move to the start of the array
                 this.classes.moveToFront(i);
                 lastInd++;
@@ -106,8 +106,18 @@ function ScheduleGenerator(
         return postProcessFilter(schedule);
     };
 
-    // if, upon adding this class, the schedule wouldn't be invalid
+    // if, upon adding this class, the schedule would be valid
     this.nextStepIsValid = function(schedule, classInd) {
+        // ensure that another of the same course doesn't exist
+        //if (schedule.classes.getLength() < 1) return true;
+        var lastInd = schedule.classes.getLength() - 1;
+        if (lastInd > -1) {
+            var lastCourse = schedule.classes.getLastItem().course;
+            for (var i = 0; i < lastInd; i++) {
+                if (schedule.classes.at(i).course == lastCourse) return false;
+            }
+        }
+
         // add class to a copied schedule
         var scheduleCopy = schedule.copy();
         this.addClass(scheduleCopy, classInd);
@@ -172,7 +182,7 @@ function ScheduleGenerator(
             return collType.unknown;
         }
         for (var i = 0; i < aTimes.length; i++) {
-            for (var j = 0; j < bTimes.length; j++) {
+            for (var j = i; j < bTimes.length; j++) {
                 var aStart = aTimes[i].start.h * 100 + aTimes[i].start.m;
                 var aEnd = aTimes[i].end.h * 100 + aTimes[i].end.m;
                 var bStart = bTimes[j].start.h * 100 + bTimes[j].start.m;
