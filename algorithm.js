@@ -108,8 +108,11 @@ function ScheduleGenerator(
 
     // if, upon adding this class, the schedule would be valid
     this.nextStepIsValid = function(schedule, classInd) {
+        // add class to a copied schedule
+        var scheduleCopy = schedule.copy();
+        this.addClass(scheduleCopy, classInd);
+
         // ensure that another of the same course doesn't exist
-        //if (schedule.classes.getLength() < 1) return true;
         var lastInd = schedule.classes.getLength() - 1;
         if (lastInd > -1) {
             var lastCourse = schedule.classes.getLastItem().course;
@@ -118,12 +121,8 @@ function ScheduleGenerator(
             }
         }
 
-        // add class to a copied schedule
-        var scheduleCopy = schedule.copy();
-        this.addClass(scheduleCopy, classInd);
         // determine if there's collision on the new class using the
         // collision matrix (Dynamic Programming) or just by calculating
-
         var lastInd = scheduleCopy.classes.getLength() - 1;
         var lastID = scheduleCopy.classes.at(lastInd).id;
         // the location of the class with id in all_classes
