@@ -32,16 +32,18 @@ function ScheduleGenerator(
         this.preProcessClasses();
         // (Dynamic Programming) used to remember previous
         // calculations when two classes didn't work before
-        this.collisionMatrix =
-            new SymmetricMatrix(this.all_classes.getLength(), 0);
+        this.collisionMatrix = new SymmetricMatrix(
+            this.all_classes.getLength(), collType.unknown);
         // Don't bother calculating schedules where a required class
         // isn't in the schedule
         if (options.coursesRequired.length > 0) {
             this.recGenerateSchedules(buildSchedule, 0);
         } else {
-            for (var i = 0; i < this.classes.getLength(); i++) {
-                this.recGenerateSchedules(buildSchedule, i);
-            }
+        //     for (var i = 0; i < this.classes.getLength(); i++) {
+        //         this.recGenerateSchedules(buildSchedule, i);
+        //     }
+            this.recGenerateSchedules(buildSchedule, 0);
+            this.recGenerateSchedules(buildSchedule, 1);
         }
         this.postProcessSchedules();
         this.calculationTime = (Date.now() - this.calculationTime) / 1000;
@@ -175,6 +177,7 @@ function ScheduleGenerator(
     this.checkCollision = function(aTimes, bTimes) {
         try {
             aTimes[0].start.h;
+            bTimes[0].start.h;
         } catch (e) {
             console.error("checkCollision: either a non-Time object was "
                 + "given or the time values don't exist");

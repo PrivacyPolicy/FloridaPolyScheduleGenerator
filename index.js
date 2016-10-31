@@ -330,11 +330,11 @@ function report(type, message) {
 // Testing ClassList object
 // var allClassLength = classes.length;
 t = new ClassList();
-t._classes = classes.slice();
+t._classes = classes.slice(0, 30);
 g = new ScheduleGenerator(t, options,
     preProcessFilter, processFilter, postProcessFilter);
 console.log("Calculating...");
-// var schedules = g.generateSchedules();
+var schedules = g.generateSchedules();
 var message = "Found " + schedules.length + " schedules in " +
     g.getCalculationTime() + " seconds";
 alert(message);
