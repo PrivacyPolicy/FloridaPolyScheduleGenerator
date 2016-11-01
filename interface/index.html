@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang=en>
+    <head>
+        <meta charset=utf-8>
+        <title>Florida Poly Schedule Generator</title>
+        
+        <link rel=stylesheet href=styles/styles.css>
+        <link rel=stylesheet href=styles/scrollbars.css>
+        <link rel=stylesheet href=styles/step_styles.css>
+        <link href="https://fonts.googleapis.com/css?family=Ubuntu"
+            rel=stylesheet>
+
+        <script src=scripts/jquery.min.js></script>
+        <script src=scripts/interface.js></script>
+    </head>
+    
+    <body>
+        <nav>
+            <div class=done>Step 1</div>
+            <div>Step 2</div>
+            <div>Step 3</div>
+            <div>Step 4</div>
+            <div>Step 5</div>
+            <div>Final</div>
+        </nav>
+        <main>
+            <div id=steps data-page=1>
+                <!-- Major, Concentration, Classes Taken -->
+                <div id=step1 class=step>
+                    Step 1
+                    <br><br>
+                    Major, Concentration, Classes Taken
+                    <br><br>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sit amet sem vitae ligula placerat dictum. Aliquam erat volutpat. Quisque sagittis lorem vel est sodales, a imperdiet purus feugiat. Vivamus venenatis accumsan quam. Aenean dignissim est tellus, sit amet pellentesque mauris condimentum quis. Praesent lobortis dui elit, malesuada aliquam felis auctor ac. Fusce non magna condimentum, scelerisque lectus facilisis, tempus lorem. Ut ligula arcu, blandit eget semper condimentum, aliquet sit amet ante. Nullam aliquet vitae nisl at dapibus. Duis euismod ante urna, id condimentum nibh auctor id. Vestibulum eleifend varius libero non porta. Nunc imperdiet hendrerit turpis, iaculis scelerisque mi congue sit amet. Phasellus sed dolor in tortor convallis maximus in et felis. Morbi tempor aliquet libero non mollis.
+                    <br><br>
+                    Aliquam interdum, nibh tempor faucibus pellentesque, ante ex fringilla justo, vel gravida nulla magna non ipsum. Vestibulum at porta est. Duis efficitur, ante sit amet viverra suscipit, urna leo suscipit enim, at molestie nibh ipsum sit amet dolor. Nullam eleifend purus at tempus blandit. Etiam elementum dictum pharetra. Cras in est lectus. In erat nisl, venenatis id diam ac, dignissim laoreet dui. Nulla ut augue a urna ullamcorper pretium. Duis a dapibus dui.
+                    <br><br>
+                    Interdum et malesuada fames ac ante ipsum primis in faucibus. Ut laoreet velit ac convallis molestie. Morbi bibendum iaculis gravida. Ut sapien metus, gravida consectetur sagittis sed, fermentum ac turpis. Integer elementum lorem at orci laoreet ultrices. Duis interdum ante non dictum egestas. Pellentesque lorem magna, accumsan in sagittis et, tempus vel justo. Praesent elit nulla, congue a mauris id, tincidunt faucibus sapien. Vestibulum et diam orci. Donec nec ullamcorper quam, in consequat justo. Curabitur non consectetur neque. Maecenas euismod luctus felis. Nam nisi est, tincidunt vel venenatis ac, facilisis sed quam.
+                    <br><br>
+                    Proin ut pharetra diam. Pellentesque commodo vestibulum dolor, ut elementum mi scelerisque ac. Vivamus ultrices sapien eu dolor tempor, vitae ullamcorper ipsum vehicula. Aenean felis nunc, gravida vitae dictum quis, rhoncus sit amet leo. Donec at ante urna. Cras feugiat scelerisque mauris a pharetra. Etiam eget dui mauris.
+                    <br><br>
+                    Cras bibendum tristique lobortis. Phasellus laoreet diam condimentum placerat tempus. Pellentesque a ligula nec mi porta tempor. Praesent accumsan ultrices sapien ut faucibus. Etiam imperdiet elit et odio fringilla pretium sit amet sit amet urna. Donec varius enim quis metus dictum commodo. Ut pharetra auctor justo, sed sollicitudin sapien vulputate vitae. Donec non suscipit nisl, eget varius justo. Ut molestie neque vitae tincidunt cursus. Etiam leo metus, laoreet et bibendum ut, viverra at diam.
+                </div>
+
+                <!-- Schedule (times) -->
+                <div id=step2 class=step>
+                    Step 2
+                    <br><br>
+                    Schedule (times)
+                    <br><br>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sit amet sem vitae ligula placerat dictum. Aliquam erat volutpat. Quisque sagittis lorem vel est sodales, a imperdiet purus feugiat. Vivamus venenatis accumsan quam. Aenean dignissim est tellus, sit amet pellentesque mauris condimentum quis. Praesent lobortis dui elit, malesuada aliquam felis auctor ac. Fusce non magna condimentum, scelerisque lectus facilisis, tempus lorem. Ut ligula arcu, blandit eget semper condimentum, aliquet sit amet ante. Nullam aliquet vitae nisl at dapibus. Duis euismod ante urna, id condimentum nibh auctor id. Vestibulum eleifend varius libero non porta. Nunc imperdiet hendrerit turpis, iaculis scelerisque mi congue sit amet. Phasellus sed dolor in tortor convallis maximus in et felis. Morbi tempor aliquet libero non mollis.
+                    <br><br>
+                    Aliquam interdum, nibh tempor faucibus pellentesque, ante ex fringilla justo, vel gravida nulla magna non ipsum. Vestibulum at porta est. Duis efficitur, ante sit amet viverra suscipit, urna leo suscipit enim, at molestie nibh ipsum sit amet dolor. Nullam eleifend purus at tempus blandit. Etiam elementum dictum pharetra. Cras in est lectus. In erat nisl, venenatis id diam ac, dignissim laoreet dui. Nulla ut augue a urna ullamcorper pretium. Duis a dapibus dui.
+                    <br><br>
+                    Interdum et malesuada fames ac ante ipsum primis in faucibus. Ut laoreet velit ac convallis molestie. Morbi bibendum iaculis gravida. Ut sapien metus, gravida consectetur sagittis sed, fermentum ac turpis. Integer elementum lorem at orci laoreet ultrices. Duis interdum ante non dictum egestas. Pellentesque lorem magna, accumsan in sagittis et, tempus vel justo. Praesent elit nulla, congue a mauris id, tincidunt faucibus sapien. Vestibulum et diam orci. Donec nec ullamcorper quam, in consequat justo. Curabitur non consectetur neque. Maecenas euismod luctus felis. Nam nisi est, tincidunt vel venenatis ac, facilisis sed quam.
+                    <br><br>
+                    Proin ut pharetra diam. Pellentesque commodo vestibulum dolor, ut elementum mi scelerisque ac. Vivamus ultrices sapien eu dolor tempor, vitae ullamcorper ipsum vehicula. Aenean felis nunc, gravida vitae dictum quis, rhoncus sit amet leo. Donec at ante urna. Cras feugiat scelerisque mauris a pharetra. Etiam eget dui mauris.
+                    <br><br>
+                    Cras bibendum tristique lobortis. Phasellus laoreet diam condimentum placerat tempus. Pellentesque a ligula nec mi porta tempor. Praesent accumsan ultrices sapien ut faucibus. Etiam imperdiet elit et odio fringilla pretium sit amet sit amet urna. Donec varius enim quis metus dictum commodo. Ut pharetra auctor justo, sed sollicitudin sapien vulputate vitae. Donec non suscipit nisl, eget varius justo. Ut molestie neque vitae tincidunt cursus. Etiam leo metus, laoreet et bibendum ut, viverra at diam.
+                </div>
+
+                <!-- Courses (favored/unfavored)  -->
+                <div id=step3 class=step>
+                    Step 3
+                    <br><br>
+                    Courses (favored/unfavored)
+                    <br><br>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sit amet sem vitae ligula placerat dictum. Aliquam erat volutpat. Quisque sagittis lorem vel est sodales, a imperdiet purus feugiat. Vivamus venenatis accumsan quam. Aenean dignissim est tellus, sit amet pellentesque mauris condimentum quis. Praesent lobortis dui elit, malesuada aliquam felis auctor ac. Fusce non magna condimentum, scelerisque lectus facilisis, tempus lorem. Ut ligula arcu, blandit eget semper condimentum, aliquet sit amet ante. Nullam aliquet vitae nisl at dapibus. Duis euismod ante urna, id condimentum nibh auctor id. Vestibulum eleifend varius libero non porta. Nunc imperdiet hendrerit turpis, iaculis scelerisque mi congue sit amet. Phasellus sed dolor in tortor convallis maximus in et felis. Morbi tempor aliquet libero non mollis.
+                    <br><br>
+                    Aliquam interdum, nibh tempor faucibus pellentesque, ante ex fringilla justo, vel gravida nulla magna non ipsum. Vestibulum at porta est. Duis efficitur, ante sit amet viverra suscipit, urna leo suscipit enim, at molestie nibh ipsum sit amet dolor. Nullam eleifend purus at tempus blandit. Etiam elementum dictum pharetra. Cras in est lectus. In erat nisl, venenatis id diam ac, dignissim laoreet dui. Nulla ut augue a urna ullamcorper pretium. Duis a dapibus dui.
+                    <br><br>
+                    Interdum et malesuada fames ac ante ipsum primis in faucibus. Ut laoreet velit ac convallis molestie. Morbi bibendum iaculis gravida. Ut sapien metus, gravida consectetur sagittis sed, fermentum ac turpis. Integer elementum lorem at orci laoreet ultrices. Duis interdum ante non dictum egestas. Pellentesque lorem magna, accumsan in sagittis et, tempus vel justo. Praesent elit nulla, congue a mauris id, tincidunt faucibus sapien. Vestibulum et diam orci. Donec nec ullamcorper quam, in consequat justo. Curabitur non consectetur neque. Maecenas euismod luctus felis. Nam nisi est, tincidunt vel venenatis ac, facilisis sed quam.
+                    <br><br>
+                    Proin ut pharetra diam. Pellentesque commodo vestibulum dolor, ut elementum mi scelerisque ac. Vivamus ultrices sapien eu dolor tempor, vitae ullamcorper ipsum vehicula. Aenean felis nunc, gravida vitae dictum quis, rhoncus sit amet leo. Donec at ante urna. Cras feugiat scelerisque mauris a pharetra. Etiam eget dui mauris.
+                    <br><br>
+                    Cras bibendum tristique lobortis. Phasellus laoreet diam condimentum placerat tempus. Pellentesque a ligula nec mi porta tempor. Praesent accumsan ultrices sapien ut faucibus. Etiam imperdiet elit et odio fringilla pretium sit amet sit amet urna. Donec varius enim quis metus dictum commodo. Ut pharetra auctor justo, sed sollicitudin sapien vulputate vitae. Donec non suscipit nisl, eget varius justo. Ut molestie neque vitae tincidunt cursus. Etiam leo metus, laoreet et bibendum ut, viverra at diam.
+                </div>
+
+                <!-- Professors (favored/unfavored) -->
+                <div id=step4 class=step>
+                    Step 4
+                    <br><br>
+                    Professors (favored/unfavored)
+                    <br><br>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sit amet sem vitae ligula placerat dictum. Aliquam erat volutpat. Quisque sagittis lorem vel est sodales, a imperdiet purus feugiat. Vivamus venenatis accumsan quam. Aenean dignissim est tellus, sit amet pellentesque mauris condimentum quis. Praesent lobortis dui elit, malesuada aliquam felis auctor ac. Fusce non magna condimentum, scelerisque lectus facilisis, tempus lorem. Ut ligula arcu, blandit eget semper condimentum, aliquet sit amet ante. Nullam aliquet vitae nisl at dapibus. Duis euismod ante urna, id condimentum nibh auctor id. Vestibulum eleifend varius libero non porta. Nunc imperdiet hendrerit turpis, iaculis scelerisque mi congue sit amet. Phasellus sed dolor in tortor convallis maximus in et felis. Morbi tempor aliquet libero non mollis.
+                    <br><br>
+                    Aliquam interdum, nibh tempor faucibus pellentesque, ante ex fringilla justo, vel gravida nulla magna non ipsum. Vestibulum at porta est. Duis efficitur, ante sit amet viverra suscipit, urna leo suscipit enim, at molestie nibh ipsum sit amet dolor. Nullam eleifend purus at tempus blandit. Etiam elementum dictum pharetra. Cras in est lectus. In erat nisl, venenatis id diam ac, dignissim laoreet dui. Nulla ut augue a urna ullamcorper pretium. Duis a dapibus dui.
+                    <br><br>
+                    Interdum et malesuada fames ac ante ipsum primis in faucibus. Ut laoreet velit ac convallis molestie. Morbi bibendum iaculis gravida. Ut sapien metus, gravida consectetur sagittis sed, fermentum ac turpis. Integer elementum lorem at orci laoreet ultrices. Duis interdum ante non dictum egestas. Pellentesque lorem magna, accumsan in sagittis et, tempus vel justo. Praesent elit nulla, congue a mauris id, tincidunt faucibus sapien. Vestibulum et diam orci. Donec nec ullamcorper quam, in consequat justo. Curabitur non consectetur neque. Maecenas euismod luctus felis. Nam nisi est, tincidunt vel venenatis ac, facilisis sed quam.
+                    <br><br>
+                    Proin ut pharetra diam. Pellentesque commodo vestibulum dolor, ut elementum mi scelerisque ac. Vivamus ultrices sapien eu dolor tempor, vitae ullamcorper ipsum vehicula. Aenean felis nunc, gravida vitae dictum quis, rhoncus sit amet leo. Donec at ante urna. Cras feugiat scelerisque mauris a pharetra. Etiam eget dui mauris.
+                    <br><br>
+                    Cras bibendum tristique lobortis. Phasellus laoreet diam condimentum placerat tempus. Pellentesque a ligula nec mi porta tempor. Praesent accumsan ultrices sapien ut faucibus. Etiam imperdiet elit et odio fringilla pretium sit amet sit amet urna. Donec varius enim quis metus dictum commodo. Ut pharetra auctor justo, sed sollicitudin sapien vulputate vitae. Donec non suscipit nisl, eget varius justo. Ut molestie neque vitae tincidunt cursus. Etiam leo metus, laoreet et bibendum ut, viverra at diam.
+                </div>
+
+                <!-- Extras/Other -->
+                <div id=step5 class=step>
+                    Step 5
+                    <br><br>
+                    Extras/Other
+                    <br><br>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sit amet sem vitae ligula placerat dictum. Aliquam erat volutpat. Quisque sagittis lorem vel est sodales, a imperdiet purus feugiat. Vivamus venenatis accumsan quam. Aenean dignissim est tellus, sit amet pellentesque mauris condimentum quis. Praesent lobortis dui elit, malesuada aliquam felis auctor ac. Fusce non magna condimentum, scelerisque lectus facilisis, tempus lorem. Ut ligula arcu, blandit eget semper condimentum, aliquet sit amet ante. Nullam aliquet vitae nisl at dapibus. Duis euismod ante urna, id condimentum nibh auctor id. Vestibulum eleifend varius libero non porta. Nunc imperdiet hendrerit turpis, iaculis scelerisque mi congue sit amet. Phasellus sed dolor in tortor convallis maximus in et felis. Morbi tempor aliquet libero non mollis.
+                    <br><br>
+                    Aliquam interdum, nibh tempor faucibus pellentesque, ante ex fringilla justo, vel gravida nulla magna non ipsum. Vestibulum at porta est. Duis efficitur, ante sit amet viverra suscipit, urna leo suscipit enim, at molestie nibh ipsum sit amet dolor. Nullam eleifend purus at tempus blandit. Etiam elementum dictum pharetra. Cras in est lectus. In erat nisl, venenatis id diam ac, dignissim laoreet dui. Nulla ut augue a urna ullamcorper pretium. Duis a dapibus dui.
+                    <br><br>
+                    Interdum et malesuada fames ac ante ipsum primis in faucibus. Ut laoreet velit ac convallis molestie. Morbi bibendum iaculis gravida. Ut sapien metus, gravida consectetur sagittis sed, fermentum ac turpis. Integer elementum lorem at orci laoreet ultrices. Duis interdum ante non dictum egestas. Pellentesque lorem magna, accumsan in sagittis et, tempus vel justo. Praesent elit nulla, congue a mauris id, tincidunt faucibus sapien. Vestibulum et diam orci. Donec nec ullamcorper quam, in consequat justo. Curabitur non consectetur neque. Maecenas euismod luctus felis. Nam nisi est, tincidunt vel venenatis ac, facilisis sed quam.
+                    <br><br>
+                    Proin ut pharetra diam. Pellentesque commodo vestibulum dolor, ut elementum mi scelerisque ac. Vivamus ultrices sapien eu dolor tempor, vitae ullamcorper ipsum vehicula. Aenean felis nunc, gravida vitae dictum quis, rhoncus sit amet leo. Donec at ante urna. Cras feugiat scelerisque mauris a pharetra. Etiam eget dui mauris.
+                    <br><br>
+                    Cras bibendum tristique lobortis. Phasellus laoreet diam condimentum placerat tempus. Pellentesque a ligula nec mi porta tempor. Praesent accumsan ultrices sapien ut faucibus. Etiam imperdiet elit et odio fringilla pretium sit amet sit amet urna. Donec varius enim quis metus dictum commodo. Ut pharetra auctor justo, sed sollicitudin sapien vulputate vitae. Donec non suscipit nisl, eget varius justo. Ut molestie neque vitae tincidunt cursus. Etiam leo metus, laoreet et bibendum ut, viverra at diam.
+                </div>
+
+                <!-- Show Schedule -->
+                <div id=step6 class=step>
+                    <button id=generate>Generate</button>
+                </div>
+            </div>
+        </main>
+        <footer>
+            <button id=back disabled>Back</button>
+            <button id=next class=right>Next</button>
+        </footer>
+    </body>
+</html>
