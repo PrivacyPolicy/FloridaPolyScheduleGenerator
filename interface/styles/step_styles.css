@@ -6,5 +6,8 @@
 /* Step 6 */
 button#generate {
     font-size: calc(2 * 13pt);
-    align-self: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
