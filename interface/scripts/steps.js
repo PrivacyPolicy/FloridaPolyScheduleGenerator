@@ -2,13 +2,14 @@
 function addClasses(courses) {
     var $course = $(".courseOption").first();
     $course.parent().html($course);
-    for (var i = 0; i < courses.length; i++) {
+    for (var i = courses.length - 1; i >= 0; i--) {
         var newCourse = $course.get(0).cloneNode(true);
         newCourse.getElementsByClassName("courseName")[0].innerHTML =
             courses[i].name;
         newCourse.children[1].id = "courseNum" + courses[i].id;
         $course.after(newCourse);
     }
+    if (courses.length > 0) $(".courseOption").first().remove();
 }
 
 $(function() {
