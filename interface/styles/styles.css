@@ -93,7 +93,7 @@ main {
     height: 100%;
     overflow: hidden;
     overflow-y: scroll;
-    display: flex;
+    display: block;
     justify-content: center;
     align-self: center;
     box-sizing: border-box;
