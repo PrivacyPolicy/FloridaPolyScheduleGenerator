@@ -1,0 +1,167 @@
+#scheduleInput {
+    background: white;
+    width: 100%;
+    border-radius: 5pt;
+    position: relative;
+}
+
+#scheduleBackground {
+    overflow: hidden;
+    padding: 5px 0;
+    position: relative;
+    width: 100%;
+}
+
+.timeLine {
+    position: relative;
+    height: 50px;
+}
+.timeLine > .time {
+    width: 10%;
+    text-align: right;
+    position: relative;
+    left: -5px;
+    line-height: 50px;
+}
+.timeLine > .line.horizontal {
+    top: 50%;
+    left: 10%;
+    width: 90%;
+}
+.line {
+    background: #aaa;
+    position: absolute;
+}
+.line.horizontal {
+    width: 100%;
+    height: 1px;
+}
+.line.vertical {
+    width: 1px;
+    height: 100%;
+    top: 0;
+}
+.timeLine.template {
+    display: none;
+}
+
+#scheduleTimes {
+    display: flex;
+    left: 10%;
+    width: 90%;
+    position: relative;
+}
+#scheduleTimes > div {
+    width: 100%;
+    text-align: center;
+}
+#vertLineTemplate {
+    display: none;
+}
+
+@media screen and (max-width: 400px) {
+    #scheduleTimes > div {
+        font-size: 0;
+    }
+    #scheduleTimes > div:first-letter {
+        font-size: 12pt;
+    }
+}
+
+
+#timeSlotTemplate {
+    display: none;
+}
+.timeSlot {
+    position: absolute;
+}
+.timeSlot.unfavored {
+    background: rgba(255, 0, 0, .5);
+}
+.timeSlot.favored {
+    background: rgba(0, 240, 0, 0.6);
+}
+
+.timeSlot:hover > .handle, .timeSlot.dragging > .handle {
+    opacity: 1;
+    z-index: 1;
+}
+.handle {
+    width: 100%;
+    position: absolute;
+    height: 3px;
+    opacity: 0;
+    cursor: ns-resize;
+    border: 5pt solid transparent;
+    margin-left: -5pt;
+    margin-top: -5pt;
+    
+    transition: opacity .3s;
+}
+.handle > .handleLine {
+    background: green;
+    width: 100%;
+    position: absolute;
+    height: 3px;
+}
+.handle:after {
+    content: "";
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 3.8px solid;
+    display: block;
+    position: absolute;
+    box-sizing: border-box;
+}
+.handle.top {
+    top: 0;
+}
+.handle.top:after {
+    right: -14px;
+    top: -6px;
+}
+.handle.bottom {
+    bottom: -5pt;
+}
+.handle.bottom:after {
+    left: -14px;
+    bottom: -6px;
+}
+.favored > .handle > .handleLine {
+    background: rgba(0, 200, 0, 0.9);
+}
+.favored > .handle:after {
+    border-color: rgba(0, 200, 0, 0.9);
+}
+.unfavored > .handle > .handleLine {
+    background: rgba(200, 0, 0, 0.9);
+}
+.unfavored > .handle:after {
+    border-color: rgba(200, 0, 0, 0.9);
+}
+.handle > .text {
+    font-size: 9pt;
+    line-height: 10pt;
+    padding: 2pt;
+}
+.handle.top > .text {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+.handle.bottom > .text {
+    text-align: right;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+
+#scheduleForeground {
+    position: absolute;
+    top: 50px;
+    left: 10%;
+    width: 90%;
+    height: calc(100% - 50px);
+}

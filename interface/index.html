@@ -7,13 +7,14 @@
         <link rel=stylesheet href=styles/styles.css>
         <link rel=stylesheet href=styles/scrollbars.css>
         <link rel=stylesheet href=styles/step_styles.css>
+        <link rel=stylesheet href=styles/schedule.css>
         <link href="https://fonts.googleapis.com/css?family=Ubuntu"
             rel=stylesheet>
 
         <script src=scripts/jquery.min.js></script>
         <script src=scripts/interface.js></script>
         <script src=scripts/steps.js></script>
-        <script src=scripts/step2.js></script>
+        <script src=scripts/schedule.js></script>
     </head>
 
     <body>
@@ -34,7 +35,32 @@
                 <!-- Schedule (times) -->
                 <div id=step2 class=step>
                     <h1>Select acceptable times</h1>
-                    <canvas id=timeInput></canvas>
+                    <div id=scheduleInput>
+                        <div id=scheduleBackground>
+                            <div id=scheduleTimes></div>
+                            <div id=vertLineTemplate
+                                 class="line vertical template"></div>
+                            <div id=timeLineTemplate
+                                 class="timeLine template">
+                                <div class=time>XXAM</div>
+                                <div class="line horizontal"></div>
+                            </div>
+                        </div>
+                        <div id=scheduleForeground>
+                            <div id=timeSlotTemplate
+                                 class="timeSlot">
+                                <div class="handle top">
+                                    <div class=handleLine></div>
+                                    <div class=text></div>
+                                </div>
+                                <div class="handle bottom">
+                                    <div class=handleLine></div>
+                                    <div class=text></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id=blue style="position: absolute; width: 10px; height: 10px; background: blue; left: -3930px"></div>
                 </div>
 
                 <!-- Courses (favored/unfavored)  -->
@@ -45,8 +71,10 @@
                     <br><br>
                     <u>Course List:</u>
                     <br><br>
-                    <div class=courseOption><span class=courseName>---------------</span> <input type=checkbox id=CourseNum1></div>
-
+                    <div class=courseOption>
+                        <span class=courseName></span>
+                        <input type=checkbox id=CourseNum1>
+                    </div>
                 </div>
 
                 <!-- Professors (favored/unfavored) -->

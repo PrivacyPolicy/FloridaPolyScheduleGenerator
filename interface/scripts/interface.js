@@ -1,6 +1,8 @@
 const STEP_COUNT = 6;
 const DEBUG = true;
 
+// TODO fix tab indexes so that users can't half-scroll using tab
+
 $(function() {
     if (DEBUG) {
         $("nav > div").click(function(event) {
@@ -10,6 +12,14 @@ $(function() {
     }
     $("button#next").click(nextStep);
     $("button#back").click(prevStep);
+    
+    // Go to the url's recomended step
+    try {
+        var hash = document.location.hash.substr(5);
+        toStep(parseInt(hash) - 1);
+    } catch (e) {
+        console.error("Malformed url hash: " + document.location.hash);
+    }
 });
 
 function toStep(step) {
@@ -31,19 +41,30 @@ function toStep(step) {
         .css("left", (-100 * step) + "%")
         .attr("data-page", step + 1);
     
+    // handle the end of the transition
+    $("#steps").bind("transitionend", handleTransitionEnd);
+    function handleTransitionEnd(event) {
+        document.location.hash = "step" + (getCurStep() + 1);
+        $("#steps").unbind("transitionend", handleTransitionEnd);
+    }
+    
     // update buttons
     $("button#next").prop("disabled", (step >= STEP_COUNT - 1));
     $("button#back").prop("disabled", (step < 1));
 }
 
 function nextStep() {
-    var curPage = parseInt($("#steps").attr("data-page")) - 1;
+    var curPage = getCurStep();
     (!isNaN(curPage)) ? toStep(curPage + 1) :
         console.error("Failed to navigate to next step");
 }
 
 function prevStep() {
-    var curPage = parseInt($("#steps").attr("data-page")) - 1;
+    var curPage = getCurStep();
     (!isNaN(curPage)) ? toStep(curPage - 1) :
         console.error("Failed to navigate to prev step");
+}
+
+function getCurStep() {
+    return parseInt($("#steps").attr("data-page")) - 1;
 }
