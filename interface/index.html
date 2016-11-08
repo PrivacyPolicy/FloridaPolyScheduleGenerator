@@ -8,10 +8,19 @@
         <link rel=stylesheet href=styles/scrollbars.css>
         <link rel=stylesheet href=styles/step_styles.css>
         <link rel=stylesheet href=styles/schedule.css>
+        
         <link href="https://fonts.googleapis.com/css?family=Ubuntu"
             rel=stylesheet>
 
-        <script src=scripts/jquery.min.js></script>
+        
+        <script src=../jquery.min.js></script>
+        
+        <script src=../algorithm/algorithm.js></script>
+        <script src=../algorithm/common.js></script>
+        <script src=../algorithm/constructors.js></script>
+        <script src=../algorithm/data.js></script>
+        <script src=../algorithm/implement.js></script>
+        
         <script src=scripts/interface.js></script>
         <script src=scripts/steps.js></script>
         <script src=scripts/schedule.js></script>
@@ -58,9 +67,14 @@
                                     <div class=text></div>
                                 </div>
                             </div>
+                            <div id=whichColor>
+                                <div id=chooseUnfavored>Okay</div>
+                                <div id=chooseFavored>Ideal</div>
+                            </div>
                         </div>
                     </div>
-                    <div id=blue style="position: absolute; width: 10px; height: 10px; background: blue; left: -3930px"></div>
+                    <br>
+                    <button id=scheduleReset>Reset</button>
                 </div>
 
                 <!-- Courses (favored/unfavored)  -->

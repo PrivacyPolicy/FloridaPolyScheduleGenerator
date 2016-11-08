@@ -283,11 +283,16 @@ function Options() {
         favoredValue: 15
     };
     this.timesNeutral = [ // default: 8:00AM-6:00PM M-F
-        new Time(1, 8, 0, 18, 0),
-        new Time(2, 8, 0, 18, 0),
-        new Time(3, 8, 0, 18, 0),
-        new Time(4, 8, 0, 18, 0),
-        new Time(5, 8, 0, 18, 0)
+        new Time(1, 8, 0, 9, 0),
+        new Time(1, 17, 0, 18, 0),
+        new Time(2, 8, 0, 9, 0),
+        new Time(2, 17, 0, 18, 0),
+        new Time(3, 8, 0, 9, 0),
+        new Time(3, 17, 0, 18, 0),
+        new Time(4, 8, 0, 9, 0),
+        new Time(4, 17, 0, 18, 0),
+        new Time(5, 8, 0, 9, 0),
+        new Time(5, 17, 0, 18, 0)
     ];
     this.timesFavored = [ // default: 9:00AM-5:00PM M-R
         new Time(1, 9, 0, 17, 0),

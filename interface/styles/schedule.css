@@ -74,12 +74,16 @@
 }
 .timeSlot {
     position: absolute;
+    cursor: default;
 }
-.timeSlot.unfavored {
-    background: rgba(255, 0, 0, .5);
+.timeSlot.highlight {
+    outline: 2px solid skyblue;
 }
 .timeSlot.favored {
-    background: rgba(0, 240, 0, 0.6);
+    background: rgba(0, 240, 0, .6);
+}
+.timeSlot.unfavored {
+    background: rgba(240, 240, 0, .6);
 }
 
 .timeSlot:hover > .handle, .timeSlot.dragging > .handle {
@@ -99,7 +103,7 @@
     transition: opacity .3s;
 }
 .handle > .handleLine {
-    background: green;
+    background: rgba(0, 200, 0, 1);
     width: 100%;
     position: absolute;
     height: 3px;
@@ -135,10 +139,10 @@
     border-color: rgba(0, 200, 0, 0.9);
 }
 .unfavored > .handle > .handleLine {
-    background: rgba(200, 0, 0, 0.9);
+    background: rgba(230, 230, 0, 0.9);
 }
 .unfavored > .handle:after {
-    border-color: rgba(200, 0, 0, 0.9);
+    border-color: rgba(230, 230, 0, 0.9);
 }
 .handle > .text {
     font-size: 9pt;
@@ -163,5 +167,54 @@
     top: 50px;
     left: 10%;
     width: 90%;
-    height: calc(100% - 50px);
+    height: calc(100% - 80px);
+    cursor: cell;
+}
+
+#whichColor {
+    position: absolute;
+    left: calc(40% + 1px);
+    top: 50px;
+    height: 50px;
+    width: calc((20% - 2px) + 1px);
+    font-size: 10pt;
+    text-align: center;
+    line-height: 50px;
+    display: flex;
+    cursor: pointer;
+    z-index: 3;
+    left: -100000px;
+}
+#whichColor > div {
+    flex-basis: 50%;
+    transition: flex-basis .5s, color .5s;
+    overflow: hidden;
+}
+#whichColor > #chooseFavored {
+    background: rgba(0, 240, 0, .6);
+}
+#whichColor > #chooseUnfavored {
+    background: rgba(240, 240, 0, .6);
+}
+#whichColor:hover > div {
+    flex-basis: 40%;
+}
+#whichColor:hover > div:hover {
+    flex-basis: 60%;
+}
+#whichColor.favored > div,
+#whichColor.unfavored > div {
+    color: transparent;
+}
+#whichColor.favored > #chooseFavored {
+    flex-basis: 100%;
+}
+#whichColor.favored > #chooseUnfavored {
+    flex-basis: 0%;
+}
+#whichColor.unfavored > #chooseFavored {
+    flex-basis: 0%;
+}
+#whichColor.unfavored > #chooseUnfavored {
+    flex-basis: 100%;
 }

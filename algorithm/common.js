@@ -1,4 +1,4 @@
-const DEBUG = false;
+const DEBUG = true;
 
 // days:
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

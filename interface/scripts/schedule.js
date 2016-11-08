@@ -1,5 +1,6 @@
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
+const ID = "FLORIDA_POLYTECHNIC_SCHEDULE_GENERATOR";
+const STEP = "STEP";
+const HOUR_HEIGHT = 50;
 // handle canvas display of acceptable/favored times
 $(function() {
     
@@ -37,36 +38,80 @@ $(function() {
         copy.id = "";
         
         var $copy = $(copy).removeClass("template");
-        $copy.find(".time").text(
-            millTime ?
-                (to2Str(i) + "00") :
-                ((i  % 12 == 0) ? 12 : i % 12)+((i % 12 != i)?"pm":"am")
-            );
+        $copy.find(".time").text(strFromTime({h: i, m: 0}));
         
         $("#scheduleBackground").append($copy);
     }
     
-    addSlot(0, {h:8, m: 30}, {h:10, m:00}, false);
-    addSlot(1, {h:8, m: 30}, {h:10, m:00}, false);
-    addSlot(2, {h:8, m: 30}, {h:10, m:00}, false);
-    addSlot(3, {h:8, m: 30}, {h:10, m:00}, false);
-    addSlot(4, {h:8, m: 30}, {h:10, m:00}, false);
-    addSlot(5, {h:8, m: 30}, {h:10, m:00}, false);
-    addSlot(6, {h:8, m: 30}, {h:10, m:00}, false);
+    // drawSchedule([...]);
+    var data = loadTimesFromStorage();
+    if (data.length == 0) {
+        refreshSchedule();
+    }
     
     addEventListeners();
+    $(document.body).keydown(keyHandler);
+    var $fore = $("#scheduleForeground");
+    $fore.click(function(event) {
+        if ($(event.originalEvent.target).is($fore)) {
+            // get nearest 15 minutes to click location
+            var step = HOUR_HEIGHT / 4;
+            var newY = Math.round(event.offsetY / step) * step;
+            var stepX = $fore.width() / (getShowWeekends() ? 7 : 5);
+            var newX = Math.floor(event.offsetX / stepX) * stepX;
+            var width = (100 / (getShowWeekends() ? 7 : 5));
+            // place whichColor there (reset and all)
+            $("#whichColor").css({
+                left: (newX + 1) + "px",
+                top: newY + "px",
+                width: width + "%"
+            });
+        }
+    });
+    $("#whichColor").click(function(event) {
+        var $elem = $(event.originalEvent.target);
+        var fav = $elem.is("#chooseFavored");
+        $(event.currentTarget).addClass(fav ? "favored" : "unfavored");
+    }).on("transitionend", function(event) {
+        $elem = $("#whichColor");
+        if ($elem.hasClass("favored") || $elem.hasClass("unfavored")) {
+            // get top location
+            var y = parseFloat($elem.css("top"));
+            var stepX = $fore.width() / (getShowWeekends() ? 7 : 5);
+            var weekday = Math.floor(
+                parseFloat($elem.css("left")) / stepX) + 
+                (getShowWeekends() ? 0 : 1);
+            // add real slot at that location
+            var h = Math.floor(y / HOUR_HEIGHT) + getMinTime();
+            var m = (y % HOUR_HEIGHT) / HOUR_HEIGHT * 60;
+            addSlot(weekday, {h: h, m: m}, {h: h + 1, m: m},
+                   $elem.hasClass("favored"));
+            saveTimesToStorage();
+            loadTimesFromStorage();
+            addEventListeners();
+            // remove this one's class
+            $elem.removeClass("favored").removeClass("unfavored");
+            // hide this one
+            hideWhichColor();
+        }
+    });
+    $("#scheduleReset").click(function(event) {
+        if (confirm("Are you sure you want to reset the times?")) {
+            refreshSchedule();
+        }
+    });
 });
 function getMinTime() {
     return 7;
 }
 function getMaxTime() {
-    return 12 + 8;
+    return 12 + 9;
 }
 function getMillitaryTimePref() {
-    return false;
+    return true;
 }
 function getShowWeekends() {
-    return true;
+    return false;
 }
 
 
@@ -80,12 +125,11 @@ function addSlot(day, start, end, favored) {
     }
     // calculate values
     const HEIGHT = 50;
-    const START_HOUR = 7;
     const WIDTH_MARGIN = 1;
     var width = (100 / (getShowWeekends() ? 7 : 5));
     var left = width * day;
     var top = HEIGHT *
-        ( (start.h - START_HOUR) + start.m / 60);
+        ( (start.h - getMinTime()) + start.m / 60);
     var height = HEIGHT *
         ( (end.h - start.h) + (end.m - start.m) / 60 );
     var millTime = getMillitaryTimePref();
@@ -102,12 +146,14 @@ function addSlot(day, start, end, favored) {
         height: height + "px",
         width: "calc(" + width + "% - 2 * " + WIDTH_MARGIN + "px + 1px)"
     });
-    $copy.find(".handle.top > .text").text(strFromTime(start));
-    $copy.find(".handle.bottom > .text").text(strFromTime(end));
+    updateStartTime($copy, start);
+    updateEndTime($copy, end);
     $copy.addClass(favored ? "favored" : "unfavored");
+    $copy.attr("data-day", getShowWeekends() ? day : day + 1);
     
     // add the newly created slot to the view
     $("#scheduleForeground").append($copy);
+    return $copy;
 }
 
 function to2Str(number) {
@@ -115,8 +161,6 @@ function to2Str(number) {
 }
 
 function addEventListeners() {
-    const HOUR_HEIGHT = 50;
-    const START_HOUR = 7;
     var initX = 0;
     var initY = 0;
     var offsetXs = 0;
@@ -148,10 +192,11 @@ function addEventListeners() {
             origHeight = parent.height();
             origWidth = parent.width();
             down(event, l, t);
-        } else {
+        } else if ($elem.is(".timeSlot")) {
             moveRespond = moveSlotRespond;
             endRespond = endSlotRespond;
             down(event);
+            highlight($elem);
         }
     });
     
@@ -167,16 +212,16 @@ function addEventListeners() {
         var step = HOUR_HEIGHT / 4;
         newY = Math.round(newY / step) * step;
         var start = {
-            h: Math.floor(newY / HOUR_HEIGHT) + START_HOUR,
+            h: Math.floor(newY / HOUR_HEIGHT) + getMinTime(),
             m: (Math.floor(newY / (HOUR_HEIGHT / 4)) % 4 * 15)
         };
         var endY = newY + height;
         var end = {
-            h: Math.floor(endY / HOUR_HEIGHT) + START_HOUR,
+            h: Math.floor(endY / HOUR_HEIGHT) + getMinTime(),
             m: (Math.floor(endY / (HOUR_HEIGHT / 4)) % 4 * 15)
         };
-        $(elem).find(".handle.top > .text").text(strFromTime(start));
-        $(elem).find(".handle.bottom > .text").text(strFromTime(end));
+        updateStartTime(elem, start);
+        updateEndTime(elem, end);
     }
     
     function endSlotRespond(elem, origX, origY, offsetX, offsetY) {
@@ -193,16 +238,16 @@ function addEventListeners() {
             top: newY + "px"
         });
         var start = {
-            h: Math.floor(newY / HOUR_HEIGHT) + START_HOUR,
+            h: Math.floor(newY / HOUR_HEIGHT) + getMinTime(),
             m: (Math.floor(newY / (HOUR_HEIGHT / 4)) % 4 * 15)
         };
         var endY = newY + height;
         var end = {
-            h: Math.floor(endY / HOUR_HEIGHT) + START_HOUR,
+            h: Math.floor(endY / HOUR_HEIGHT) + getMinTime(),
             m: (Math.floor(endY / (HOUR_HEIGHT / 4)) % 4 * 15)
         };
-        $(elem).find(".handle.top > .text").text(strFromTime(start));
-        $(elem).find(".handle.bottom > .text").text(strFromTime(end));
+        updateStartTime(elem, start);
+        updateEndTime(elem, end);
     }
     
     function moveHandleTopRespond(elem, origX, origY, offsetX, offsetY){
@@ -217,10 +262,10 @@ function addEventListeners() {
         var step = HOUR_HEIGHT / 4;
         newY = Math.round(newY / step) * step;
         var start = {
-            h: Math.floor(newY / HOUR_HEIGHT) + START_HOUR,
+            h: Math.floor(newY / HOUR_HEIGHT) + getMinTime(),
             m: (Math.floor(newY / (HOUR_HEIGHT / 4)) % 4 * 15)
         };
-        $(elem).find(".text").text(strFromTime(start));
+        updateStartTime(elem.parentElement, start);
     }
     
     function endHandleTopRespond(elem, origX, origY, offsetX, offsetY) {
@@ -237,17 +282,18 @@ function addEventListeners() {
             height: ( origHeight - (newY - origY) ) + "px"
         });
         var start = {
-            h: Math.floor(newY / HOUR_HEIGHT) + START_HOUR,
+            h: Math.floor(newY / HOUR_HEIGHT) + getMinTime(),
             m: (Math.floor(newY / (HOUR_HEIGHT / 4)) % 4 * 15)
         };
-        $(elem).find(".text").text(strFromTime(start));
+        updateStartTime(elem.parentElement, start);
     }
     
     function moveHandleBtmRespond(elem, origX, origY, offsetX, offsetY){
         var newY = origY + offsetY;
-        var maxY = parseInt($(elem).parent().parent().css("top")) +
-            newY;
-        if (newY > maxY) newY = maxY;
+        var maxY = $("#scheduleForeground").height();
+        var elemTop = parseInt($(elem).parent().css("top"));
+        if (newY + elemTop > maxY) newY = maxY - elemTop;
+        if (newY <= origY - origHeight) newY = origY - origHeight;
         $(elem).parent().css({
             height: (newY) + "px"
         });
@@ -255,30 +301,31 @@ function addEventListeners() {
         newY = Math.round(newY / step) * step;
         var endY = newY + parseInt($(elem).parent().css("top"));
         var end = {
-            h: Math.floor(endY / HOUR_HEIGHT) + START_HOUR,
+            h: Math.floor(endY / HOUR_HEIGHT) + getMinTime(),
             m: (Math.floor(endY / (HOUR_HEIGHT / 4)) % 4 * 15)
         };
-        $(elem).find(".text").text(strFromTime(end));
+        updateEndTime(elem.parentElement, end);
     }
     
     function endHandleBtmRespond(elem, origX, origY, offsetX, offsetY) {
         var newY = origY + offsetY;
-        var maxY = $(elem).parent().parent().height() +
-            parseFloat($(elem).css("top"));
+        var maxY = $("#scheduleForeground").height();
+        var elemTop = parseInt($(elem).parent().css("top"));
+        if (newY + elemTop > maxY) newY = maxY - elemTop;
         
         var step = HOUR_HEIGHT / 4;
         newY = Math.round(newY / step) * step;
+        while (newY <= origY - origHeight) newY += step;
         
-        if (newY > maxY) newY = maxY;
         $(elem).parent().css({
             height: (newY) + "px"
         });
         var endY = newY + parseInt($(elem).parent().css("top"));
         var end = {
-            h: Math.floor(endY / HOUR_HEIGHT) + START_HOUR,
+            h: Math.floor(endY / HOUR_HEIGHT) + getMinTime(),
             m: (Math.floor(endY / (HOUR_HEIGHT / 4)) % 4 * 15)
         };
-        $(elem).find(".text").text(strFromTime(end));
+        updateEndTime(elem.parentElement, end);
     }
     
     function down(event, origX, origY) {
@@ -321,12 +368,14 @@ function addEventListeners() {
         offsetYs = 0;
         initX = 0;
         initY = 0;
+        // save the data
+        saveTimesToStorage();
     }
 }
 
 function strFromTime(object) {
     if (getMillitaryTimePref()) {
-        return to2Str(object.h) + object.m;
+        return to2Str(object.h) + to2Str(object.m);
     } else {
         var h = object.h;
         var pm = (h % 12 != h);
@@ -336,3 +385,109 @@ function strFromTime(object) {
     }
 }
 
+function updateStartTime(timeSlot, time) {
+    $(timeSlot).attr("data-s-h", time.h).attr("data-s-m", time.m)
+        .find(".handle.top > .text").text(strFromTime(time));
+}
+function updateEndTime(timeSlot, time) {
+    $(timeSlot).attr("data-e-h", time.h).attr("data-e-m", time.m)
+        .find(".handle.bottom > .text").text(strFromTime(time));
+}
+
+const HIGHLIGHT_CLASS = "highlight";
+function highlight($timeSlot) {
+    unHighlight();
+    $timeSlot.addClass(HIGHLIGHT_CLASS);
+    
+    function temp() {
+        setTimeout(function() {
+            $("*:not(.timeSlot):not(.timeSlot *)")
+                .on("click", unHighlight);
+        }, 1);
+        $(document.body).off("mouseup", temp);
+    }
+    $(document.body).on("mouseup", temp);
+}
+function unHighlight() {
+    event.stopPropagation();
+    $("." + HIGHLIGHT_CLASS).removeClass(HIGHLIGHT_CLASS);
+    $("*").off("click", unHighlight);
+}
+
+function keyHandler(event) {
+    //console.log(event.which);
+    if (event.which === 8) { // delete
+        deleteSlot($("." + HIGHLIGHT_CLASS));
+    } else if (event.which == 27) { // esc
+        unHighlight();
+        hideWhichColor();
+    }
+}
+
+function deleteSlot($elem) {
+    $elem.remove();
+    saveTimesToStorage();
+}
+
+function saveTimesToStorage() {
+    var $slots = $(".timeSlot:not(#timeSlotTemplate)");
+    var slotObjs = [];
+    for (var i = 0; i < $slots.size(); i++) {
+        var $slot = $slots.eq(i);
+        var object = {
+            pref: $slot.hasClass("favored") ?
+                pref.neutral : pref.unfavored,
+            time: new Time(
+                parseInt($slot.attr("data-day")),
+                parseInt($slot.attr("data-s-h")),
+                parseInt($slot.attr("data-s-m")),
+                parseInt($slot.attr("data-e-h")),
+                parseInt($slot.attr("data-e-m")))
+        };
+        slotObjs.push(object);
+    }
+    localStorage[ID + "_" + STEP + "2"] = JSON.stringify(slotObjs);
+}
+
+function loadTimesFromStorage() {
+    var slotObjs = JSON.parse(localStorage[ID + "_" + STEP + "2"]);
+    drawSchedule(slotObjs);
+    return slotObjs;
+}
+
+function drawSchedule(slotObjs) {
+    // set the current schedule to blank
+    $(".timeSlot:not(#whichColor):not(#timeSlotTemplate)").remove();
+    // draw new data
+    for (var i = 0; i < slotObjs.length; i++) {
+        var a = slotObjs[i];
+        addSlot(a.time.day, a.time.start, a.time.end,
+                (a.pref == pref.neutral));
+    }
+}
+
+function refreshSchedule() {
+    $(".timeSlot:not(#whichColor):not(#timeSlotTemplate)").remove();
+    // initial schedule data
+    addSlot(1, {h:8, m: 00}, {h:9, m:00}, false);
+    addSlot(1, {h:9, m: 00}, {h:17, m:00}, true);
+    addSlot(1, {h:17, m: 00}, {h:18, m:30}, false);
+    addSlot(2, {h:8, m: 00}, {h:9, m:00}, false);
+    addSlot(2, {h:9, m: 00}, {h:17, m:00}, true);
+    addSlot(2, {h:17, m: 00}, {h:18, m:30}, false);
+    addSlot(3, {h:8, m: 00}, {h:9, m:00}, false);
+    addSlot(3, {h:9, m: 00}, {h:17, m:00}, true);
+    addSlot(3, {h:17, m: 00}, {h:18, m:30}, false);
+    addSlot(4, {h:8, m: 00}, {h:9, m:00}, false);
+    addSlot(4, {h:9, m: 00}, {h:17, m:00}, true);
+    addSlot(4, {h:17, m: 00}, {h:18, m:30}, false);
+    addSlot(5, {h:8, m: 00}, {h:9, m:00}, false);
+    addSlot(5, {h:9, m: 00}, {h:17, m:00}, true);
+    addSlot(5, {h:17, m: 00}, {h:18, m:30}, false);
+    addEventListeners();
+    saveTimesToStorage();
+}
+
+function hideWhichColor() {
+    $elem.css("left", "-10000px");
+}

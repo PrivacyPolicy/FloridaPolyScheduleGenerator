@@ -327,20 +327,20 @@ function report(type, message) {
     if (DEBUG) console.log(type + " removed because " + message);
 }
 
-// Testing ClassList object
-// var allClassLength = classes.length;
-t = new ClassList();
-t._classes = classes.slice(0, 30);
-g = new ScheduleGenerator(t, options,
-    preProcessFilter, processFilter, postProcessFilter);
-console.log("Calculating...");
-var schedules = g.generateSchedules();
-var message = "Found " + schedules.length + " schedules in " +
-    g.getCalculationTime() + " seconds";
-alert(message);
-console.log(message);
-console.log(schedules);
-
-$(function() {
-    displaySchedules(schedules, 0, 200);
-});
+//// Testing ClassList object
+//// var allClassLength = classes.length;
+//t = new ClassList();
+//t._classes = classes.slice(0, 30);
+//g = new ScheduleGenerator(t, options,
+//    preProcessFilter, processFilter, postProcessFilter);
+//console.log("Calculating...");
+//var schedules = g.generateSchedules();
+//var message = "Found " + schedules.length + " schedules in " +
+//    g.getCalculationTime() + " seconds";
+//alert(message);
+//console.log(message);
+//console.log(schedules);
+//
+//$(function() {
+//    displaySchedules(schedules, 0, 200);
+//});

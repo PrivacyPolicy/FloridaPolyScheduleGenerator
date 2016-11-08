@@ -1,5 +1,4 @@
 const STEP_COUNT = 6;
-const DEBUG = true;
 
 // TODO fix tab indexes so that users can't half-scroll using tab
 

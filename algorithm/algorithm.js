@@ -39,9 +39,6 @@ function ScheduleGenerator(
         if (options.coursesRequired.length > 0) {
             this.recGenerateSchedules(buildSchedule, 0);
         } else {
-        //     for (var i = 0; i < this.classes.getLength(); i++) {
-        //         this.recGenerateSchedules(buildSchedule, i);
-        //     }
             this.recGenerateSchedules(buildSchedule, 0);
             this.recGenerateSchedules(buildSchedule, 1);
         }
@@ -69,6 +66,8 @@ function ScheduleGenerator(
                 lastInd++;
             }
         }
+        // favored times should be considered acceptable by the algorithm
+        this.timesNeutral = this.timesNeutral.concat(this.timesFavored);
     };
 
     // remove any residual classes that passed but are still bad
