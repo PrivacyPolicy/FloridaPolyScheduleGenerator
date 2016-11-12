@@ -14,8 +14,9 @@ $(function() {
     
     // Go to the url's recomended step
     try {
-        var hash = document.location.hash.substr(5);
-        toStep(parseInt(hash) - 1);
+        var hash = parseInt(document.location.hash.substr(5));
+        if (isNaN(hash)) hash = 1;
+        toStep(hash - 1);
     } catch (e) {
         console.error("Malformed url hash: " + document.location.hash);
     }

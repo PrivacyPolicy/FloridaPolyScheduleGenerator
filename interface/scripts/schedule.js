@@ -47,9 +47,9 @@ $(function() {
     var data = loadTimesFromStorage();
     if (data.length == 0) {
         refreshSchedule();
+    } else {
+        addEventListeners();
     }
-    
-    addEventListeners();
     $(document.body).keydown(keyHandler);
     var $fore = $("#scheduleForeground");
     $fore.click(function(event) {
