@@ -450,9 +450,13 @@ function saveTimesToStorage() {
 }
 
 function loadTimesFromStorage() {
-    var slotObjs = JSON.parse(localStorage[ID + "_" + STEP + "2"]);
-    drawSchedule(slotObjs);
-    return slotObjs;
+    try {
+        var slotObjs = JSON.parse(localStorage[ID + "_" + STEP + "2"]);
+        drawSchedule(slotObjs);
+        return slotObjs;
+    } catch (e) {
+        return [];
+    }
 }
 
 function drawSchedule(slotObjs) {
