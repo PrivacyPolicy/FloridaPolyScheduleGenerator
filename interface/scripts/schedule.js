@@ -1,5 +1,3 @@
-const ID = "FLORIDA_POLYTECHNIC_SCHEDULE_GENERATOR";
-const STEP = "STEP";
 const HOUR_HEIGHT = 50;
 // handle canvas display of acceptable/favored times
 $(function() {

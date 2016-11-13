@@ -36,6 +36,7 @@
             <div>Final</div>
         </nav>
         <main>
+            <div id=loading></div>
             <div id=steps data-page=1>
                 <!-- Major, Concentration, Classes Taken -->
                 <div id=step1 class=step>
@@ -52,13 +53,13 @@
                   </select>
                   <br><br>
 
-                  <h1>Classes Taken:</h1>
-                  <select id=chooseClasses>
-                    <option value="Testing9">Testing</option>
-                    <option value="Testing10">Classes</option>
-                    <option value="Testing11">Dropdown</option>
-                    <option value="Testing12">Hello</option>
-                  </select>
+                  <h1>Courses Taken:</h1>
+                    <div id=chooseCourses>
+                        <div id=courseTemplate class="course template">
+                            <input type=checkbox>
+                            <span class=courseName></span>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Schedule (times) -->

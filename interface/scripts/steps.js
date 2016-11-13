@@ -1,10 +1,13 @@
+const ID = "FLORIDA_POLYTECHNIC_SCHEDULE_GENERATOR";
+const STEP = "STEP";
 // Step 1 - Major, Concentration, and Courses
 $(function() {
     const JSON_URL = "external/output.json";
     const DEFAULT_SELECT = "Select one...";
     var jsonData = {};
     var $major = $("#selectMajor"),
-        $concentration = $("#selectConcentration");
+        $concentration = $("#selectConcentration"),
+        $courses = $("#chooseCourses");
     $.ajax({
         success: function(data, textStatus, jqXHR) {
             if (typeof data == "object") {
@@ -13,6 +16,10 @@ $(function() {
                 for (major in data) {
                     addMajor(major);
                 }
+                loadCoursesFromStorage();
+                
+                // remove loading from center of screen
+                $("#loading").addClass("hidden");
             } else {
                 console.error("Data loaded is not JSON");
             }
@@ -35,6 +42,19 @@ $(function() {
         } else {
             $concentration.attr("disabled", "disabled");
         }
+        saveCoursesToStorage();
+    });
+    $concentration.change(function(event) {
+        var value = event.target.value;
+        purgeCourses();
+        if (value != DEFAULT_SELECT) {
+            var data = jsonData[$major.val()][value];
+            for (var course in data) {
+                addCourse(data[course]);
+            }
+            $(".course > input").change(selectCourse);
+        }
+        saveCoursesToStorage();
     });
     function addMajor(major) {
         var copy = $major.children().get(0).cloneNode(true);
@@ -60,7 +80,57 @@ $(function() {
     function purgeConcentration() {
         $concentration.html($concentration.children().eq(0));
     }
+    function addCourse(courseObj) {
+        var copy = $courses.children().get(0).cloneNode(true);
+        copy.id = "course-" + courseObj.id;
+        var $copy = $(copy);
+        $copy.removeClass("template");
+        $copy.find(".courseName").text(courseObj.name);
+        $copy.find("input").attr("name", courseObj.id);
+        $copy.attr("title", courseObj.name);
+//        $copy.attr("data-electives",courseObj.electivesInGroup);
+        $courses.append($copy);
+    }
+    function purgeCourses() {
+        $courses.html($courses.children().eq(0));
+    }
+    function selectCourse(event) {
+        // possibly select other classes in elective group?
+        saveCoursesToStorage();
+    }
 });
+
+function saveCoursesToStorage() {
+    var object = {
+        "major": $("#selectMajor").val(),
+        "concentration": $("#selectConcentration").val(),
+        "courses": {}
+    };
+    $(".course:not(.template)").each(function(i, elem) {
+        var $elem = $(elem);
+        object.courses[$elem.attr("id")] =
+            ($elem.find("input:checked").size() > 0);
+    });
+    localStorage[ID + "_" + STEP + "1"] = JSON.stringify(object);
+}
+function loadCoursesFromStorage() {
+    try {
+        var object = JSON.parse(localStorage[ID + "_" + STEP + "1"]);
+        $("#selectMajor > [value='" + object.major + "']")
+            .prop("selected", true).trigger("change");
+        $("#selectConcentration > [value='" + object.concentration +
+           "']")
+            .prop("selected", true).trigger("change");
+        $(".course:not(.template)").each(function(i, elem) {
+            $(elem).find("input").get(0).checked =
+                (object.courses[elem.id]);
+        });
+        saveCoursesToStorage();
+        return object;
+    } catch (e) {
+        return {};
+    }
+}
 
 
 // Step 3
