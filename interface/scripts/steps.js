@@ -106,6 +106,7 @@ function loadCoursesFromStorage() {
         saveCoursesToStorage();
         return object;
     } catch (e) {
+        console.error(e);
         return {};
     }
 }
@@ -148,6 +149,11 @@ function step3Init() {
         // must be okay
         addCoursePref(course);
     }
+    loadCoursePrefsFromStorage();
+    $("#step3 input[type=radio]").click(function(event) {
+        console.log("click");
+        saveCoursePrefsToStorage();
+    });
 }
 function courseWasTaken(takenCourses, id) {
     return !!takenCourses["course-" + id];
@@ -156,12 +162,20 @@ function getAllowMultipleElectives() {
     return false;
 }
 function addCoursePref(coursePrefObj) {
+    var data = loadCoursesFromStorage();
+    var courses = jsonData[data.major][data.concentration];
+    for (var course in courses) {
+        if (courses[course].id == coursePrefObj.id) break;
+    }
+    course = courses[course];
     var $coursePrefs = $("#coursePrefs");
     var copy = $coursePrefs.children().get(0).cloneNode(true);
     copy.id = "coursePref-" + coursePrefObj.id;
     var $copy = $(copy);
     $copy.removeClass("template");
-    $copy.find(".coursePrefName").text(coursePrefObj.name);
+    $copy.find(".coursePrefName").text(course.name)
+        .attr("title", course.name + "\n" +
+              course.description);
     $copy.find("[name=coursePrefTemp]")
         .attr("name", "coursePref" + coursePrefObj.id);
     $copy.find("[id*=Temp]").each(function(i, elem) {
@@ -172,16 +186,62 @@ function addCoursePref(coursePrefObj) {
         $(elem).attr("for", $(elem).attr("for").split("Temp").join(
             coursePrefObj.id + Math.floor(i / 2)));
     });
-    if (coursePrefObj.pref == pref.unfavored) {
-        $copy.find(".unfavored").prop("checked", true);
-    } else if (coursePrefObj.pref == pref.neutral) {
-        $copy.find(".neutral").prop("checked", true);
-    } else if (coursePrefObj.pref == pref.favored) {
-        $copy.find(".favored").prop("checked", true);
-    }
     $coursePrefs.append($copy);
 }
 function purgeCoursePrefs() {
     var $coursePrefs = $("#coursePrefs");
     $coursePrefs.html($coursePrefs.children().eq(0));
 }
+
+function saveCoursePrefsToStorage() {
+    var object = {};
+    $(".coursePref:not(.template)").each(function(i, elem) {
+        var $elem = $(elem);
+        object[$elem.attr("id")] = {
+            "pref": pref[$elem.find(":checked + label")[0].classList[0]]
+        };
+    });
+    localStorage[ID + "_" + STEP + "3"] = JSON.stringify(object);
+}
+function loadCoursePrefsFromStorage() {
+    try {
+        var data = JSON.parse(localStorage[ID + "_" + STEP + "3"]);
+        $(".coursePref:not(.template)").each(function(i, elem) {
+            var $elem = $(elem);
+            var thePref = data[$elem.attr("id")].pref;
+            if (thePref == pref.unacceptable) {
+                $elem.find(".unacceptable").click();
+            } else if (thePref == pref.unfavored) {
+                $elem.find(".unfavored").click();
+            } else if (thePref == pref.favored) {
+                $elem.find(".favored").click();
+            } else if (thePref == pref.required) {
+                $elem.find(".required").click();
+            } else { // pref == pref.neutral
+                $elem.find(".neutral").click();
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error(e);
+        return {};
+    }
+}
+//function loadCoursesFromStorage() {
+//    try {
+//        var object = JSON.parse(localStorage[ID + "_" + STEP + "1"]);
+//        $("#selectMajor > [value='" + object.major + "']")
+//            .prop("selected", true).trigger("change");
+//        $("#selectConcentration > [value='" + object.concentration +
+//           "']")
+//            .prop("selected", true).trigger("change");
+//        $(".course:not(.template)").each(function(i, elem) {
+//            $(elem).find("input").get(0).checked =
+//                (object.courses[elem.id]);
+//        });
+//        saveCoursesToStorage();
+//        return object;
+//    } catch (e) {
+//        return {};
+//    }
+//}

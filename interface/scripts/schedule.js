@@ -453,6 +453,7 @@ function loadTimesFromStorage() {
         drawSchedule(slotObjs);
         return slotObjs;
     } catch (e) {
+        console.error(e);
         return [];
     }
 }
