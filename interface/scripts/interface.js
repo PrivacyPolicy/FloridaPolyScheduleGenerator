@@ -11,15 +11,6 @@ $(function() {
     }
     $("button#next").click(nextStep);
     $("button#back").click(prevStep);
-    
-    // Go to the url's recomended step
-    try {
-        var hash = parseInt(document.location.hash.substr(5));
-        if (isNaN(hash)) hash = 1;
-        toStep(hash - 1);
-    } catch (e) {
-        console.error("Malformed url hash: " + document.location.hash);
-    }
 });
 
 function toStep(step) {
@@ -51,6 +42,15 @@ function toStep(step) {
     // update buttons
     $("button#next").prop("disabled", (step >= STEP_COUNT - 1));
     $("button#back").prop("disabled", (step < 1));
+    
+    // call specific step's visibliity functions
+    switch (step + 1) {
+        case 3:
+            step3Init();
+            break;
+        default:
+            break;
+    }
 }
 
 function nextStep() {

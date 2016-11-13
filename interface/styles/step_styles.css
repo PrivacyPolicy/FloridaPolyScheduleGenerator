@@ -9,6 +9,53 @@
 }
 /* Step 2 */
 /* Step 3 */
+.coursePref {
+    display: flex;
+    margin: 1em;
+}
+.coursePref > .coursePrefName {
+    padding: .2em;
+    margin: 0 .5em;
+}
+.coursePref > input[type=radio] {
+    display: none;
+}
+.coursePref > input[type=radio] + label {
+    display: inline-block;
+    text-align: center;
+    border-radius: 5px;
+    border: 1px solid gray;
+    width: 2em;
+    padding: .2em;
+    background: lightgray;
+}
+.coursePref > input[type=radio] + label.unfavored {
+    border-right: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.coursePref > input[type=radio] + label.neutral {
+    border-radius: 0;
+}
+.coursePref > input[type=radio] + label.favored {
+    border-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+.coursePref > input[type=radio]:checked + label.unfavored {
+    background: red;
+}
+.coursePref > input[type=radio]:checked + label.neutral {
+    background: yellow;
+}
+.coursePref > input[type=radio]:checked + label.favored {
+    background: lime;
+}
+.coursePref > input[type=radio]:focus + label {
+    border-color: blue;
+    border-width: 2px;
+}
+
 /* Step 4 */
 /* Step 5 */
 /* Step 6 */

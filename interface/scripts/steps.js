@@ -1,36 +1,8 @@
-const ID = "FLORIDA_POLYTECHNIC_SCHEDULE_GENERATOR";
-const STEP = "STEP";
 // Step 1 - Major, Concentration, and Courses
 $(function() {
-    const JSON_URL = "external/output.json";
-    const DEFAULT_SELECT = "Select one...";
-    var jsonData = {};
     var $major = $("#selectMajor"),
         $concentration = $("#selectConcentration"),
         $courses = $("#chooseCourses");
-    $.ajax({
-        success: function(data, textStatus, jqXHR) {
-            if (typeof data == "object") {
-                jsonData = data;
-                purgeMajor();
-                for (major in data) {
-                    addMajor(major);
-                }
-                loadCoursesFromStorage();
-                
-                // remove loading from center of screen
-                $("#loading").addClass("hidden");
-            } else {
-                console.error("Data loaded is not JSON");
-            }
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            console.error("JSON course data failed to load: "
-                          + errorThrown + ", " + textStatus);
-        },
-        url: JSON_URL,
-        dataType: "json"
-    });
     $major.change(function(event) {
         purgeConcentration();
         var value = event.target.value;
@@ -56,49 +28,55 @@ $(function() {
         }
         saveCoursesToStorage();
     });
-    function addMajor(major) {
-        var copy = $major.children().get(0).cloneNode(true);
-        copy.id = "";
-        var $copy = $(copy);
-        $copy.removeClass("template");
-        $copy.text(major);
-        $copy.val(major);
-        $major.append($copy);
-    }
-    function purgeMajor() {
-        $major.html($major.children().eq(0));
-    }
-    function addConcentration(concentration) {
-        var copy = $concentration.children().get(0).cloneNode(true);
-        copy.id = "";
-        var $copy = $(copy);
-        $copy.removeClass("template");
-        $copy.text(concentration);
-        $copy.val(concentration);
-        $concentration.append($copy);
-    }
-    function purgeConcentration() {
-        $concentration.html($concentration.children().eq(0));
-    }
-    function addCourse(courseObj) {
-        var copy = $courses.children().get(0).cloneNode(true);
-        copy.id = "course-" + courseObj.id;
-        var $copy = $(copy);
-        $copy.removeClass("template");
-        $copy.find(".courseName").text(courseObj.name);
-        $copy.find("input").attr("name", courseObj.id);
-        $copy.attr("title", courseObj.name);
-//        $copy.attr("data-electives",courseObj.electivesInGroup);
-        $courses.append($copy);
-    }
-    function purgeCourses() {
-        $courses.html($courses.children().eq(0));
-    }
-    function selectCourse(event) {
-        // possibly select other classes in elective group?
-        saveCoursesToStorage();
-    }
 });
+function addMajor(major) {
+    var $major = $("#selectMajor");
+    var copy = $major.children().get(0).cloneNode(true);
+    copy.id = "";
+    var $copy = $(copy);
+    $copy.removeClass("template");
+    $copy.text(major);
+    $copy.val(major);
+    $major.append($copy);
+}
+function purgeMajor() {
+    var $major = $("#selectMajor");
+    $major.html($major.children().eq(0));
+}
+function addConcentration(concentration) {
+    var $concentration = $("#selectConcentration");
+    var copy = $concentration.children().get(0).cloneNode(true);
+    copy.id = "";
+    var $copy = $(copy);
+    $copy.removeClass("template");
+    $copy.text(concentration);
+    $copy.val(concentration);
+    $concentration.append($copy);
+}
+function purgeConcentration() {
+    var $concentration = $("#selectConcentration");
+    $concentration.html($concentration.children().eq(0));
+}
+function addCourse(courseObj) {
+    var $courses = $("#chooseCourses");
+    var copy = $courses.children().get(0).cloneNode(true);
+    copy.id = "course-" + courseObj.id;
+    var $copy = $(copy);
+    $copy.removeClass("template");
+    $copy.find(".courseName").text(courseObj.name);
+    $copy.find("input").attr("name", courseObj.id);
+    $copy.attr("title", courseObj.name);
+//    $copy.attr("data-electives",courseObj.electivesInGroup);
+    $courses.append($copy);
+}
+function purgeCourses() {
+    var $courses = $("#chooseCourses");
+    $courses.html($courses.children().eq(0));
+}
+function selectCourse(event) {
+    // possibly select other classes in elective group?
+    saveCoursesToStorage();
+}
 
 function saveCoursesToStorage() {
     var object = {
@@ -134,25 +112,76 @@ function loadCoursesFromStorage() {
 
 
 // Step 3
-function addClasses(courses) {
-    var $course = $(".courseOption").first();
-    $course.parent().html($course);
-    for (var i = courses.length - 1; i >= 0; i--) {
-        var newCourse = $course.get(0).cloneNode(true);
-        newCourse.getElementsByClassName("courseName")[0].innerHTML =
-            courses[i].name;
-        newCourse.children[1].id = "courseNum" + courses[i].id;
-        $course.after(newCourse);
+function step3Init() {
+    // find out which courses are takeable
+    var data = loadCoursesFromStorage();
+    if (!data.courses) {
+        toStep(0);
+        return;
     }
-    if (courses.length > 0) $(".courseOption").first().remove();
+    if (data.major == DEFAULT_SELECT ||
+        data.concentration == DEFAULT_SELECT) {
+        toStep(0);
+        return;
+    }
+    var takenCourses = data.courses;
+    var courses = jsonData[data.major][data.concentration];
+    purgeCoursePrefs();
+    loop1: for (var i = 0; i < courses.length; i++) {
+        var course = courses[i];
+        
+        // if already taken
+        if (courseWasTaken(takenCourses, course.id)) continue;
+        // if elective already taken
+        if (!getAllowMultipleElectives()) {
+            for (var elective in course.electivesInGroup) {
+                var c = course.electivesInGroup[elective];
+                if (courseWasTaken(takenCourses, c)) continue loop1;
+            }
+        }
+        // if prereqs not met
+        for (var prereq in course.prereqs) {
+            var c = course.prereqs[prereq];
+            if (!courseWasTaken(takenCourses, c)) continue loop1;
+        }
+        
+        // must be okay
+        addCoursePref(course);
+    }
 }
-
-$(function() {
-    addClasses([
-        {id: "01", name:"Course1"},
-        {id: "02", name:"Course2"},
-        {id: "03", name:"Course3"},
-        {id: "04", name:"Course4"},
-        {id: "05", name:"Course5"},
-        {id: "06", name:"Course6"}]);
-});
+function courseWasTaken(takenCourses, id) {
+    return !!takenCourses["course-" + id];
+}
+function getAllowMultipleElectives() {
+    return false;
+}
+function addCoursePref(coursePrefObj) {
+    var $coursePrefs = $("#coursePrefs");
+    var copy = $coursePrefs.children().get(0).cloneNode(true);
+    copy.id = "coursePref-" + coursePrefObj.id;
+    var $copy = $(copy);
+    $copy.removeClass("template");
+    $copy.find(".coursePrefName").text(coursePrefObj.name);
+    $copy.find("[name=coursePrefTemp]")
+        .attr("name", "coursePref" + coursePrefObj.id);
+    $copy.find("[id*=Temp]").each(function(i, elem) {
+        elem.id = elem.id.split("Temp").join(
+            coursePrefObj.id + Math.floor(i / 2));
+    });
+    $copy.find("[for*=Temp]").each(function(i, elem) {
+        $(elem).attr("for", $(elem).attr("for").split("Temp").join(
+            coursePrefObj.id + Math.floor(i / 2)));
+    });
+    if (coursePrefObj.pref == pref.unfavored) {
+        $copy.find(".unfavored").prop("checked", true);
+    } else if (coursePrefObj.pref == pref.neutral) {
+        $copy.find(".neutral").prop("checked", true);
+    } else if (coursePrefObj.pref == pref.favored) {
+        $copy.find(".favored").prop("checked", true);
+    }
+    $coursePrefs.append($copy);
+}
+function purgeCoursePrefs() {
+    var $coursePrefs = $("#coursePrefs");
+    $coursePrefs.html($coursePrefs.children().eq(0));
+}

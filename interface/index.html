@@ -21,8 +21,9 @@
         <script src=../algorithm/data.js></script>
         <script src=../algorithm/implement.js></script>
         
-        <script src=scripts/interface.js></script>
+        <script src=scripts/common.js></script>
         <script src=scripts/steps.js></script>
+        <script src=scripts/interface.js></script>
         <script src=scripts/schedule.js></script>
     </head>
 
@@ -41,19 +42,19 @@
                 <!-- Major, Concentration, Classes Taken -->
                 <div id=step1 class=step>
 
-                  <h1>Major:</h1>
+                  <h1>Major</h1>
                   <select id=selectMajor>
                     <option>Select one...</option>
                   </select>
                   <br><br>
 
-                  <h1>Concentration:</h1>
+                  <h1>Concentration</h1>
                   <select id=selectConcentration disabled>
                     <option>Select one...</option>
                   </select>
                   <br><br>
 
-                  <h1>Courses Taken:</h1>
+                  <h1>Courses Taken</h1>
                     <div id=chooseCourses>
                         <div id=courseTemplate class="course template">
                             <input type=checkbox>
@@ -100,15 +101,26 @@
 
                 <!-- Courses (favored/unfavored)  -->
                 <div id=step3 class=step>
-                    Step 3
-                    <br><br>
-                    <u>Courses (favored/unfavored)</u>
-                    <br><br>
-                    <u>Course List:</u>
-                    <br><br>
-                    <div class=courseOption>
-                        <span class=courseName></span>
-                        <input type=checkbox id=CourseNum1>
+                    <h1>Course Preferences</h1>
+                    <div id=coursePrefs>
+                        <div class="coursePref template">
+                            <input type=radio name=coursePrefTemp
+                                   id=coursePrefTemp0>
+                            <label for=coursePrefTemp0 class=unfavored>
+                                NO
+                            </label>
+                            <input type=radio name=coursePrefTemp
+                                   id=coursePrefTemp1 checked>
+                            <label for=coursePrefTemp1 class=neutral>
+                                EH
+                            </label>
+                            <input type=radio name=coursePrefTemp
+                                   id=coursePrefTemp2>
+                            <label for=coursePrefTemp2 class=favored>
+                                OK
+                            </label>
+                            <span class=coursePrefName>Test</span>
+                        </div>
                     </div>
                 </div>
 

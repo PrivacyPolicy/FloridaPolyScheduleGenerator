@@ -106,7 +106,7 @@ function getMaxTime() {
     return 12 + 9;
 }
 function getMillitaryTimePref() {
-    return true;
+    return false;
 }
 function getShowWeekends() {
     return false;
