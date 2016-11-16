@@ -448,13 +448,17 @@ function saveTimesToStorage() {
 }
 
 function loadTimesFromStorage() {
+    var slotObjs = getTimesFromStorage();
+    if (!slotObjs) return [];
+    drawSchedule(slotObjs);
+    return slotObjs;
+}
+function getTimesFromStorage() {
     try {
-        var slotObjs = JSON.parse(localStorage[ID + "_" + STEP + "2"]);
-        drawSchedule(slotObjs);
-        return slotObjs;
+        return JSON.parse(localStorage[ID + "_" + STEP + "2"]);
     } catch (e) {
         console.error(e);
-        return [];
+        return null;
     }
 }
 

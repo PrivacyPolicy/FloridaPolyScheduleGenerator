@@ -92,30 +92,37 @@ function saveCoursesToStorage() {
     localStorage[ID + "_" + STEP + "1"] = JSON.stringify(object);
 }
 function loadCoursesFromStorage() {
+    var object = getCoursesFromStorage();
+    if (!object) return {};
+    $("#selectMajor > [value='" + object.major + "']")
+        .prop("selected", true).trigger("change");
+    $("#selectConcentration > [value='" + object.concentration +
+       "']")
+        .prop("selected", true).trigger("change");
+    $(".course:not(.template)").each(function(i, elem) {
+        $(elem).find("input").get(0).checked =
+            (object.courses[elem.id]);
+    });
+    saveCoursesToStorage();
+    return object;
+}
+// get the data from the storage
+function getCoursesFromStorage() {
     try {
-        var object = JSON.parse(localStorage[ID + "_" + STEP + "1"]);
-        $("#selectMajor > [value='" + object.major + "']")
-            .prop("selected", true).trigger("change");
-        $("#selectConcentration > [value='" + object.concentration +
-           "']")
-            .prop("selected", true).trigger("change");
-        $(".course:not(.template)").each(function(i, elem) {
-            $(elem).find("input").get(0).checked =
-                (object.courses[elem.id]);
-        });
-        saveCoursesToStorage();
-        return object;
+        return JSON.parse(localStorage[ID + "_" + STEP + "1"]);
     } catch (e) {
         console.error(e);
-        return {};
+        return null;
     }
 }
+
+
 
 
 // Step 3
 function step3Init() {
     // find out which courses are takeable
-    var data = loadCoursesFromStorage();
+    var data = getCoursesFromStorage();
     if (!data.courses) {
         toStep(0);
         return;
@@ -143,15 +150,23 @@ function step3Init() {
         // if prereqs not met
         for (var prereq in course.prereqs) {
             var c = course.prereqs[prereq];
-            if (!courseWasTaken(takenCourses, c)) continue loop1;
+            if (typeof c == "number") {
+                if (!courseWasTaken(takenCourses, c)) continue loop1;
+            } else { // array, so OR them
+                // if at least one is being taken, we're good
+                for (var orPrereq in c) {
+                    if (courseWasTaken(takenCourses, c[orPrereq])) {
+                        break;
+                    }
+                }
+            }
         }
         
         // must be okay
-        addCoursePref(course);
+        addCoursePref(data, course);
     }
     loadCoursePrefsFromStorage();
     $("#step3 input[type=radio]").click(function(event) {
-        console.log("click");
         saveCoursePrefsToStorage();
     });
 }
@@ -161,8 +176,7 @@ function courseWasTaken(takenCourses, id) {
 function getAllowMultipleElectives() {
     return false;
 }
-function addCoursePref(coursePrefObj) {
-    var data = loadCoursesFromStorage();
+function addCoursePref(data, coursePrefObj) {
     var courses = jsonData[data.major][data.concentration];
     for (var course in courses) {
         if (courses[course].id == coursePrefObj.id) break;
@@ -204,44 +218,32 @@ function saveCoursePrefsToStorage() {
     localStorage[ID + "_" + STEP + "3"] = JSON.stringify(object);
 }
 function loadCoursePrefsFromStorage() {
+    var data = getCoursePrefsFromStorage();
+    if (!data) return {};
+    $(".coursePref:not(.template)").each(function(i, elem) {
+        var $elem = $(elem);
+        var theData = data[$elem.attr("id")];
+        if (!theData) return;
+        var thePref = theData.pref;
+        if (thePref == pref.unacceptable) {
+            $elem.find(".unacceptable").click();
+        } else if (thePref == pref.unfavored) {
+            $elem.find(".unfavored").click();
+        } else if (thePref == pref.favored) {
+            $elem.find(".favored").click();
+        } else if (thePref == pref.required) {
+            $elem.find(".required").click();
+        } else { // pref == pref.neutral
+            $elem.find(".neutral").click();
+        }
+    });
+    return data;
+}
+function getCoursePrefsFromStorage() {
     try {
-        var data = JSON.parse(localStorage[ID + "_" + STEP + "3"]);
-        $(".coursePref:not(.template)").each(function(i, elem) {
-            var $elem = $(elem);
-            var thePref = data[$elem.attr("id")].pref;
-            if (thePref == pref.unacceptable) {
-                $elem.find(".unacceptable").click();
-            } else if (thePref == pref.unfavored) {
-                $elem.find(".unfavored").click();
-            } else if (thePref == pref.favored) {
-                $elem.find(".favored").click();
-            } else if (thePref == pref.required) {
-                $elem.find(".required").click();
-            } else { // pref == pref.neutral
-                $elem.find(".neutral").click();
-            }
-        });
-        return data;
+        return JSON.parse(localStorage[ID + "_" + STEP + "3"]);
     } catch (e) {
         console.error(e);
-        return {};
+        return null;
     }
 }
-//function loadCoursesFromStorage() {
-//    try {
-//        var object = JSON.parse(localStorage[ID + "_" + STEP + "1"]);
-//        $("#selectMajor > [value='" + object.major + "']")
-//            .prop("selected", true).trigger("change");
-//        $("#selectConcentration > [value='" + object.concentration +
-//           "']")
-//            .prop("selected", true).trigger("change");
-//        $(".course:not(.template)").each(function(i, elem) {
-//            $(elem).find("input").get(0).checked =
-//                (object.courses[elem.id]);
-//        });
-//        saveCoursesToStorage();
-//        return object;
-//    } catch (e) {
-//        return {};
-//    }
-//}
