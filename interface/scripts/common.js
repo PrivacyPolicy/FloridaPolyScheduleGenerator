@@ -19,13 +19,18 @@ $(function() {
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            console.error("JSON course data failed to load: "
-                          + errorThrown + ", " + textStatus);
+            if (errorThrown == "") {
+                // not using a server, using a file system
+                jsonData = tempBackCompData;
+                init();
+            } else {
+                console.error("JSON course data failed to load: "
+                              + errorThrown + ", " + textStatus);
+            }
         },
         url: JSON_URL,
         dataType: "json"
     });
-    
     
     function init() {
         // do some step-specific stuff at startup
