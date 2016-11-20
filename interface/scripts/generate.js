@@ -7,4 +7,7 @@ $(function() {
         // calculate ranking
         // when finished, show first, highest-ranked schedule
     });
+    $("#generateCancel").click(function() {
+        console.log("Cancel Generating");
+    });
 });

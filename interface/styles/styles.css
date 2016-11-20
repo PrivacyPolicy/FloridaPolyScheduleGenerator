@@ -136,3 +136,21 @@ button.right {
 #loading.hidden {
     display: none;
 }
+
+
+
+/* generating loading indicator */
+#generateStatus {
+    width: 50%;
+    background: #afafaf;
+    padding: 1em;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+#generateCancel {
+    margin: auto;
+    display: block;
+    margin-top: 1em;
+}

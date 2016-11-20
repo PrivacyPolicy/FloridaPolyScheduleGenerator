@@ -138,13 +138,20 @@
 
                 <!-- Show Schedule -->
                 <div id=step6 class=step>
-                    <button id=generate class=hidden>Generate</button>
-                    <div id=scheduleOutput class="schedule">
+                    <button id=generate>Generate</button>
+                    <div id=scheduleOutput class="schedule hidden">
                         <div class=scheduleBackground>
                             <div class=scheduleTimes></div>
                         </div>
                         <div class=scheduleForeground>
                         </div>
+                    </div>
+                    <div id=generateStatus class=hidden>
+                        <div id=generateMessage>
+                            Schedules Generated: 658
+                        </div>
+                        <br>
+                        <button id=generateCancel>Cancel</button>
                     </div>
                 </div>
             </div>
