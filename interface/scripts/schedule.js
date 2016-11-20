@@ -1,32 +1,32 @@
 const HOUR_HEIGHT = 50;
 // handle canvas display of acceptable/favored times
 $(function() {
-    
+
     // Show the vertical day columns
     var showWeekends = getShowWeekends();
     var i = (showWeekends) ? 0 : 1;
     var end = (showWeekends) ? 7 : 6;
-    var $times = $("#scheduleTimes");
+    var $times = $(".scheduleTimes");
     var lineTemplate = $("#vertLineTemplate").get(0);
     const TIME_MARGIN = 10;
     for (; i < end; i++) {
         // add weekdays to the top
         $times.append("<div>" + DAYS[i] + "</div>");
-        
+
         // add the vertical lines
         var copy = lineTemplate.cloneNode(true);
         copy.id = "";
-        
+
         var $copy = $(copy).removeClass("template");
-        
+
         // calculate left position
         var left = 10 + (90/ ((showWeekends) ? 7 : 5) ) *
             (i - (showWeekends ? 0 : 1) );
         $copy.css({left: left + "%"});
-        
-        $("#scheduleBackground").append($copy);
+
+        $(".scheduleBackground").append($copy);
     }
-    
+
     // Show the horizontal time lines
     var end = getMaxTime() + 1;
     var template = $("#timeLineTemplate").get(0);
@@ -34,13 +34,13 @@ $(function() {
     for (var i = getMinTime(); i < end; i++) {
         var copy = template.cloneNode(true);
         copy.id = "";
-        
+
         var $copy = $(copy).removeClass("template");
         $copy.find(".time").text(strFromTime({h: i, m: 0}));
-        
-        $("#scheduleBackground").append($copy);
+
+        $(".scheduleBackground").append($copy);
     }
-    
+
     // drawSchedule([...]);
     var data = loadTimesFromStorage();
     if (data.length == 0) {
@@ -49,7 +49,7 @@ $(function() {
         addEventListeners();
     }
     $(document.body).keydown(keyHandler);
-    var $fore = $("#scheduleForeground");
+    var $fore = $("#scheduleInput .scheduleForeground");
     $fore.click(function(event) {
         if ($(event.originalEvent.target).is($fore)) {
             // get nearest 15 minutes to click location
@@ -77,13 +77,13 @@ $(function() {
             var y = parseFloat($elem.css("top"));
             var stepX = $fore.width() / (getShowWeekends() ? 7 : 5);
             var weekday = Math.floor(
-                parseFloat($elem.css("left")) / stepX) + 
+                parseFloat($elem.css("left")) / stepX) +
                 (getShowWeekends() ? 0 : 1);
             // add real slot at that location
             var h = Math.floor(y / HOUR_HEIGHT) + getMinTime();
             var m = (y % HOUR_HEIGHT) / HOUR_HEIGHT * 60;
-            addSlot(weekday, {h: h, m: m}, {h: h + 1, m: m},
-                   $elem.hasClass("favored"));
+            addSlot($("#scheduleInput"), weekday, {h: h, m: m},
+                    {h: h + 1, m: m}, $elem.hasClass("favored"));
             saveTimesToStorage();
             loadTimesFromStorage();
             addEventListeners();
@@ -113,7 +113,7 @@ function getShowWeekends() {
 }
 
 
-function addSlot(day, start, end, favored) {
+function addSlot($elem, day, start, end, favored) {
     if (!getShowWeekends()) {
         if (day == 0 || day == 6) {
             return;
@@ -131,12 +131,12 @@ function addSlot(day, start, end, favored) {
     var height = HEIGHT *
         ( (end.h - start.h) + (end.m - start.m) / 60 );
     var millTime = getMillitaryTimePref();
-    
+
     // copy the time slot element
     var copy = $("#timeSlotTemplate").get(0).cloneNode(true);
     copy.id = "";
     $copy = $(copy).removeClass("template");
-    
+
     // set the values
     $copy.css({
         left: "calc(" + left + "% + " + WIDTH_MARGIN + "px)",
@@ -148,9 +148,9 @@ function addSlot(day, start, end, favored) {
     updateEndTime($copy, end);
     $copy.addClass(favored ? "favored" : "unfavored");
     $copy.attr("data-day", getShowWeekends() ? day : day + 1);
-    
+
     // add the newly created slot to the view
-    $("#scheduleForeground").append($copy);
+    $elem.find(".scheduleForeground").append($copy);
     return $copy;
 }
 
@@ -166,7 +166,7 @@ function addEventListeners() {
     var draggingElems;
     var moveRespond;
     var endRespond;
-    
+
     var origHeight = 0, origWidth = 0;
     $(".timeSlot, .handle").on("mousedown", function(event) {
         var $elem = $(event.currentTarget);
@@ -197,7 +197,7 @@ function addEventListeners() {
             highlight($elem);
         }
     });
-    
+
     function moveSlotRespond(elem, origX, origY, offsetX, offsetY) {
         var newY = origY + offsetY;
         if (newY < 0) newY = 0;
@@ -221,14 +221,14 @@ function addEventListeners() {
         updateStartTime(elem, start);
         updateEndTime(elem, end);
     }
-    
+
     function endSlotRespond(elem, origX, origY, offsetX, offsetY) {
         var newY = origY + offsetY;
         if (newY < 0) newY = 0;
         var maxY = $(elem).parent().height();
         var height = $(elem).height();
         if (newY + height > maxY) newY = maxY - height;
-        
+
         // snap to nearest 15 minutes
         var step = HOUR_HEIGHT / 4;
         newY = Math.round(newY / step) * step;
@@ -247,7 +247,7 @@ function addEventListeners() {
         updateStartTime(elem, start);
         updateEndTime(elem, end);
     }
-    
+
     function moveHandleTopRespond(elem, origX, origY, offsetX, offsetY){
         var newY = origY + offsetY;
         if (newY < 0) newY = 0;
@@ -265,16 +265,16 @@ function addEventListeners() {
         };
         updateStartTime(elem.parentElement, start);
     }
-    
+
     function endHandleTopRespond(elem, origX, origY, offsetX, offsetY) {
         var newY = origY + offsetY;
         if (newY < 0) newY = 0;
         var maxY = origY + origHeight;
-        
+
         var step = HOUR_HEIGHT / 4;
         newY = Math.round(newY / step) * step;
         while (newY >= maxY) newY -= step;
-        
+
         $(elem).parent().css({
             top: newY + "px",
             height: ( origHeight - (newY - origY) ) + "px"
@@ -285,7 +285,7 @@ function addEventListeners() {
         };
         updateStartTime(elem.parentElement, start);
     }
-    
+
     function moveHandleBtmRespond(elem, origX, origY, offsetX, offsetY){
         var newY = origY + offsetY;
         var maxY = $("#scheduleForeground").height();
@@ -304,17 +304,17 @@ function addEventListeners() {
         };
         updateEndTime(elem.parentElement, end);
     }
-    
+
     function endHandleBtmRespond(elem, origX, origY, offsetX, offsetY) {
         var newY = origY + offsetY;
         var maxY = $("#scheduleForeground").height();
         var elemTop = parseInt($(elem).parent().css("top"));
         if (newY + elemTop > maxY) newY = maxY - elemTop;
-        
+
         var step = HOUR_HEIGHT / 4;
         newY = Math.round(newY / step) * step;
         while (newY <= origY - origHeight) newY += step;
-        
+
         $(elem).parent().css({
             height: (newY) + "px"
         });
@@ -325,7 +325,7 @@ function addEventListeners() {
         };
         updateEndTime(elem.parentElement, end);
     }
-    
+
     function down(event, origX, origY) {
         // initialize offset for elem
         var elem = event.currentTarget;
@@ -341,17 +341,17 @@ function addEventListeners() {
         $(document.body)
             .on("mousemove", move)
             .on("mouseup", up);
-        
+
         $(draggingElem).parentsUntil("#scheduleForeground").last()
             .addClass("dragging");
     }
-    
+
     function move(event) {
         moveRespond(draggingElem,
                     offsetXs, offsetYs,
                     event.pageX - initX, event.pageY - initY);
     }
-    
+
     function up(event) {
         $(draggingElem).parentsUntil("#scheduleForeground").last()
             .removeClass("dragging");
@@ -396,7 +396,7 @@ const HIGHLIGHT_CLASS = "highlight";
 function highlight($timeSlot) {
     unHighlight();
     $timeSlot.addClass(HIGHLIGHT_CLASS);
-    
+
     function temp() {
         setTimeout(function() {
             $("*:not(.timeSlot):not(.timeSlot *)")
@@ -468,29 +468,30 @@ function drawSchedule(slotObjs) {
     // draw new data
     for (var i = 0; i < slotObjs.length; i++) {
         var a = slotObjs[i];
-        addSlot(a.time.day, a.time.start, a.time.end,
-                (a.pref == pref.neutral));
+        addSlot($("#scheduleInput"), a.time.day, a.time.start,
+                a.time.end, (a.pref == pref.neutral));
     }
 }
 
 function refreshSchedule() {
     $(".timeSlot:not(#whichColor):not(#timeSlotTemplate)").remove();
     // initial schedule data
-    addSlot(1, {h:8, m: 00}, {h:9, m:00}, false);
-    addSlot(1, {h:9, m: 00}, {h:17, m:00}, true);
-    addSlot(1, {h:17, m: 00}, {h:18, m:30}, false);
-    addSlot(2, {h:8, m: 00}, {h:9, m:00}, false);
-    addSlot(2, {h:9, m: 00}, {h:17, m:00}, true);
-    addSlot(2, {h:17, m: 00}, {h:18, m:30}, false);
-    addSlot(3, {h:8, m: 00}, {h:9, m:00}, false);
-    addSlot(3, {h:9, m: 00}, {h:17, m:00}, true);
-    addSlot(3, {h:17, m: 00}, {h:18, m:30}, false);
-    addSlot(4, {h:8, m: 00}, {h:9, m:00}, false);
-    addSlot(4, {h:9, m: 00}, {h:17, m:00}, true);
-    addSlot(4, {h:17, m: 00}, {h:18, m:30}, false);
-    addSlot(5, {h:8, m: 00}, {h:9, m:00}, false);
-    addSlot(5, {h:9, m: 00}, {h:17, m:00}, true);
-    addSlot(5, {h:17, m: 00}, {h:18, m:30}, false);
+    var $schedule = $("#scheduleInput");
+    addSlot($schedule, 1, {h:8, m: 00}, {h:9, m:00}, false);
+    addSlot($schedule, 1, {h:9, m: 00}, {h:17, m:00}, true);
+    addSlot($schedule, 1, {h:17, m: 00}, {h:18, m:30}, false);
+    addSlot($schedule, 2, {h:8, m: 00}, {h:9, m:00}, false);
+    addSlot($schedule, 2, {h:9, m: 00}, {h:17, m:00}, true);
+    addSlot($schedule, 2, {h:17, m: 00}, {h:18, m:30}, false);
+    addSlot($schedule, 3, {h:8, m: 00}, {h:9, m:00}, false);
+    addSlot($schedule, 3, {h:9, m: 00}, {h:17, m:00}, true);
+    addSlot($schedule, 3, {h:17, m: 00}, {h:18, m:30}, false);
+    addSlot($schedule, 4, {h:8, m: 00}, {h:9, m:00}, false);
+    addSlot($schedule, 4, {h:9, m: 00}, {h:17, m:00}, true);
+    addSlot($schedule, 4, {h:17, m: 00}, {h:18, m:30}, false);
+    addSlot($schedule, 5, {h:8, m: 00}, {h:9, m:00}, false);
+    addSlot($schedule, 5, {h:9, m: 00}, {h:17, m:00}, true);
+    addSlot($schedule, 5, {h:17, m: 00}, {h:18, m:30}, false);
     addEventListeners();
     saveTimesToStorage();
 }

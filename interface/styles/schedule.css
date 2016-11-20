@@ -1,11 +1,15 @@
 #scheduleInput {
+
+}
+
+.schedule {
     background: white;
     width: 100%;
     border-radius: 5pt;
     position: relative;
 }
 
-#scheduleBackground {
+.scheduleBackground {
     overflow: hidden;
     padding: 5px 0;
     position: relative;
@@ -45,13 +49,13 @@
     display: none;
 }
 
-#scheduleTimes {
+.scheduleTimes {
     display: flex;
     left: 10%;
     width: 90%;
     position: relative;
 }
-#scheduleTimes > div {
+.scheduleTimes > div {
     width: 100%;
     text-align: center;
 }
@@ -60,10 +64,10 @@
 }
 
 @media screen and (max-width: 400px) {
-    #scheduleTimes > div {
+    .scheduleTimes > div {
         font-size: 0;
     }
-    #scheduleTimes > div:first-letter {
+    .scheduleTimes > div:first-letter {
         font-size: 12pt;
     }
 }
@@ -99,7 +103,7 @@
     border: 5pt solid transparent;
     margin-left: -5pt;
     margin-top: -5pt;
-    
+
     transition: opacity .3s;
 }
 .handle > .handleLine {
@@ -162,12 +166,14 @@
 }
 
 
-#scheduleForeground {
+.scheduleForeground {
     position: absolute;
     top: 50px;
     left: 10%;
     width: 90%;
     height: calc(100% - 80px);
+}
+#scheduleInput > .scheduleForeground {
     cursor: cell;
 }
 

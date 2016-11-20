@@ -84,7 +84,8 @@ function rawToClasses(data) {
         if (!m) continue; // for some reason, some classes don't meet :$
         classes.push(new Class(classID++, courses[courseInd], times,
             m.professor, data[i].number.substr(-2),
-            "", "", m.room, m.maxSeats, m.maxSeats - m.takenSeats));
+            "", "", m.room, data[i].maxSeats,
+            data[i].maxSeats - data[i].takenSeats));
     }
 }
 

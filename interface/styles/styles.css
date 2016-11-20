@@ -9,6 +9,9 @@ body {
     cursor: default;
     font-size: 12pt;
 }
+.hidden {
+    display: none;
+}
 button {
     background: #492f92;
     border: 1px solid #fff;
@@ -16,7 +19,7 @@ button {
     font-family: 'Ubuntu', sans-serif;
     padding: .4em;
     font-size: 12pt;
-    
+
     transition: background .2s, color .05s;
 }
 button:disabled {
@@ -54,7 +57,7 @@ nav > div {
     position: relative;
     opacity: 1;
     overflow: hidden;
-    
+
     background: #798088;
     transition: opacity .4s;
 }
@@ -85,7 +88,7 @@ main {
     display: flex;
     justify-content: center;
     left: 0;
-    
+
     transition: left .4s;
 }
 .step {

@@ -8,25 +8,27 @@
         <link rel=stylesheet href=styles/scrollbars.css>
         <link rel=stylesheet href=styles/step_styles.css>
         <link rel=stylesheet href=styles/schedule.css>
-        
-        <link href="https://fonts.googleapis.com/css?family=Ubuntu"
-            rel=stylesheet>
 
-        
+        <!-- TODO add this back before pushing -->
+        <!--<link href="https://fonts.googleapis.com/css?family=Ubuntu"
+            rel=stylesheet>-->
+
+
         <!-- used as a backup in case a file system is being used -->
         <script src=external/output_tempBackCompData.js></script>
         <script src=../jquery.min.js></script>
-        
+
         <script src=../algorithm/algorithm.js></script>
         <script src=../algorithm/common.js></script>
         <script src=../algorithm/constructors.js></script>
         <script src=../algorithm/data.js></script>
         <script src=../algorithm/implement.js></script>
-        
+
         <script src=scripts/steps.js></script>
         <script src=scripts/common.js></script>
         <script src=scripts/interface.js></script>
         <script src=scripts/schedule.js></script>
+        <script src=scripts/generate.js></script>
     </head>
 
     <body>
@@ -64,13 +66,13 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Schedule (times) -->
                 <div id=step2 class=step>
                     <h1>Select acceptable times</h1>
-                    <div id=scheduleInput>
-                        <div id=scheduleBackground>
-                            <div id=scheduleTimes></div>
+                    <div id=scheduleInput class=schedule>
+                        <div class=scheduleBackground>
+                            <div class=scheduleTimes></div>
                             <div id=vertLineTemplate
                                  class="line vertical template"></div>
                             <div id=timeLineTemplate
@@ -79,7 +81,7 @@
                                 <div class="line horizontal"></div>
                             </div>
                         </div>
-                        <div id=scheduleForeground>
+                        <div class=scheduleForeground>
                             <div id=timeSlotTemplate
                                  class="timeSlot">
                                 <div class="handle top">
@@ -136,7 +138,14 @@
 
                 <!-- Show Schedule -->
                 <div id=step6 class=step>
-                    <button id=generate>Generate</button>
+                    <button id=generate class=hidden>Generate</button>
+                    <div id=scheduleOutput class="schedule">
+                        <div class=scheduleBackground>
+                            <div class=scheduleTimes></div>
+                        </div>
+                        <div class=scheduleForeground>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
