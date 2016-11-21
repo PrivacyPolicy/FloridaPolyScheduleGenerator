@@ -76,3 +76,12 @@ canvas#timeInput {
 .template {
     display: none;
 }
+
+/* Step Final */
+.classTime {
+    position: absolute;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

@@ -261,28 +261,6 @@ var courses = [
         [], [10], [], "pink",
         new ClassList([classes[21]]))
 ];
-// classes[0].course = courses[0];
-// classes[1].course = courses[0];
-// classes[2].course = courses[1];
-// classes[3].course = courses[1];
-// classes[4].course = courses[2];
-// classes[5].course = courses[2];
-// classes[6].course = courses[2];
-// classes[7].course = courses[3];
-// classes[8].course = courses[3];
-// classes[9].course = courses[3];
-// classes[10].course = courses[4];
-// classes[11].course = courses[5];
-// classes[12].course = courses[5];
-// classes[13].course = courses[5];
-// classes[14].course = courses[5];
-// classes[15].course = courses[6];
-// classes[16].course = courses[7];
-// classes[17].course = courses[8];
-// classes[18].course = courses[8];
-// classes[19].course = courses[9];
-// classes[20].course = courses[10];
-// classes[21].course = courses[11];
 
 
 var options = new Options();

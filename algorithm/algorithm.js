@@ -24,7 +24,9 @@ function ScheduleGenerator(
     };
 
     // user-friendly code to start the calculations
-    this.generateSchedules = function() {
+    this.generateSchedules = function(callback) {
+        var progressCallback = (typeof callback == "function")
+            ? callback : function() {};
         // TODO: put this code in a JS Worker
         this.calculationTime = Date.now();
         var buildSchedule = new Schedule();
@@ -37,17 +39,17 @@ function ScheduleGenerator(
         // Don't bother calculating schedules where a required class
         // isn't in the schedule
         if (options.coursesRequired.length > 0) {
-            this.recGenerateSchedules(buildSchedule, 0);
+            this.recGenerateSchedules(buildSchedule, 0, progressCallback);
         } else {
-            this.recGenerateSchedules(buildSchedule, 0);
-            this.recGenerateSchedules(buildSchedule, 1);
+            this.recGenerateSchedules(buildSchedule, 0, progressCallback);
+            this.recGenerateSchedules(buildSchedule, 1, progressCallback);
         }
         this.postProcessSchedules();
         this.calculationTime = (Date.now() - this.calculationTime) / 1000;
         return this.schedules;
     };
     // favored times should be considered acceptable by the algorithm
-    options.timesNeutral = options.timesNeutral.concat(options.timesFavored);
+    options.timesNeutral = options.timesNeutral.concat(options.timesUnfavored);
 
     // remove any classes that would never work in the first place
     this.preProcessClasses = function() {
@@ -55,7 +57,7 @@ function ScheduleGenerator(
         for (var c = this.courses.getLength() - 1; c >= 0; c--) {
             var classes = this.courses.at(c).getClassList();
             for (var i = classes.getLength() - 1; i >= 0; i--) {
-                if (!this.preProcessFilter(classes.at(i))) {
+                if (!this.preProcessFilter(this.options, classes.at(i))) {
                     classes.removeAt(i);
                 }
             }
@@ -91,7 +93,8 @@ function ScheduleGenerator(
 
     // the core of this API, the recursive-backtracking
     // function that generates the schedules
-    this.recGenerateSchedules = function(buildSchedule, courseInd) {
+    this.recGenerateSchedules = function(
+            buildSchedule, courseInd, progressCallback) {
         // if (this.isCompleteSchedule(buildSchedule)) {
         //     this.schedules.push(buildSchedule.copy());
         // }
@@ -105,6 +108,7 @@ function ScheduleGenerator(
         // }
         if (this.isCompleteSchedule(buildSchedule)) {
             this.schedules.push(buildSchedule.copy());
+            progressCallback(this.schedules.length);
         }
         for (var i = courseInd; i < this.courses.getLength(); i++) {
             var classList = this.courses.at(i).getClassList();
@@ -112,7 +116,8 @@ function ScheduleGenerator(
                 if (this.nextStepIsValid(buildSchedule, i, j)) {
                     this.addClass(buildSchedule, i, j);
                     // recursive call:
-                    this.recGenerateSchedules(buildSchedule, i + 1);
+                    this.recGenerateSchedules(
+                        buildSchedule, i + 1, progressCallback);
                     this.removeClass(buildSchedule, i, j);
                 }
             }
@@ -123,7 +128,7 @@ function ScheduleGenerator(
 
     // if the overall schedule is valid
     this.isCompleteSchedule = function(schedule) {
-        return postProcessFilter(schedule);
+        return postProcessFilter(this.options, schedule);
     };
 
     // if, upon adding this class, the schedule would be valid
@@ -164,7 +169,7 @@ function ScheduleGenerator(
                 scheduleCopy.classes.at(lastInd).times);
             if (collision == collType.collision) return false;
         }
-        return processFilter(scheduleCopy);
+        return processFilter(this.options, scheduleCopy);
     };
 
     // add the class to the schedule's class list

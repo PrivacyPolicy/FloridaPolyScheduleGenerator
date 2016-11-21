@@ -1,18 +1,250 @@
 $(function() {
+    var worker, workerRanking = false, schedules = [],
+        classToColor = {};
     $("#generate").click(function() {
         console.log("Generating Schedules");
+
         // get all of the options from the page inputs
+        var options = new Options();
+        // load time preferences from step 2
+        var dataTimes = getTimesFromStorage();
+        for (var i in dataTimes) {
+            var pref = dataTimes[i].pref;
+            var time = dataTimes[i].time;
+            var timeObj = new Time(time.day, time.start.h,
+                time.start.m, time.end.h, time.end.m);
+            if (time.pref == pref.unfavored) {
+                options.addUnfavoredTime(timeObj);
+            } else if (time.pref == pref.neutral) {
+                options.addNeutralTime(timeObj);
+            }
+        }
+        // load course preferences from step 3
+        var dataCoursePrefs = getCoursePrefsFromStorage();
+        for (var i in dataCoursePrefs) {
+            var id = parseInt(i.split("-")[1]);
+            var pref = dataCoursePrefs[i];
+            options.setCoursePreference(id, pref);
+        }
+        // load credit range prefs from step ?
+        options.setCreditMin(parseInt($("#creditMin").val()));
+        options.setCreditFavoredValue(
+            parseInt($("#creditGoal").val()));
+        options.setCreditMax(parseInt($("#creditMax").val()));
+        // don't even bother showing classes with Dr. Ding
+        options.setHideDing(false);
+
+        // build list of courses from available courses
+        // (which has already been calculated by step 3...)
+        var courses = new CourseList();
+        var dataCourses = getCoursesFromStorage();
+        var rawCourses = jsonData[dataCourses.major][dataCourses.concentration];
+        for (var i in dataCoursePrefs) {
+            var id = parseInt(i.split("-")[1]);
+            var data = getCourseWithID(rawCourses, id);
+            // TODO: get class data from scraper, add them to course's classList
+            var classList = new ClassList();
+            for (var j = 0; j < classes.length; j++) {
+                if (classes[j].course.number.indexOf(data.number) == 0) {
+                    classList.add(classes[j]);
+                }
+            }
+            var course = new Course(
+                data.id, data.number, data.name, data.credits,
+                data.prereqs, data.coreq, data.electivesInGroup,
+                "blue",
+                classList
+            );
+            courses.add(course);
+        }
+
         // start the generation in a worker
-        // show the progress dialog
-        // calculate ranking
+        if (!window.Worker || true) {// if we can't run it in the background
+            start();
+            // hide the cancel button because it can't be cancelled
+            $("#generateCancel").addClass("hidden");
+            var generator = new ScheduleGenerator(courses, options,
+                preProcessFilter, processFilter, postProcessFilter);
+            console.log("Calculating...");
+            schedules = generator.generateSchedules(middle);
+            var message = "Found " + schedules.length + " schedules in " +
+                generator.getCalculationTime() + " seconds";
+            console.log(message);
+            alert(message);
+            // show the progress dialog
+            // calculate ranking, sort by ranking (lowest==better)
+            for (var i = 0; i < schedules.length; i++) {
+                schedules[i].calculateRanking();
+            }
+            schedules.sort(function(a, b) {
+                var _a = a.ranking, _b = b.ranking;
+                if (_a === _b) return 0;
+                return (_a < _b) ? -1 : 1;
+            });
+            finish();
+        } else {
+            // worker = new Worker("scripts/worker.js");
+            // worker.postMessage(JSON.stringify([courses, options]));
+            // var totalSchedules = 0,
+            //     $message = $("#generateMessage");
+            // worker.onmessage = function(event) {
+            //     console.log("Worker message received from worker");
+            //     var data = JSON.parse(event.data);
+            //     // how many schedules have either been made or have been ranked
+            //     var progress = parseInt(data[1]);
+            //     if (data[0] === "generating") {
+            //         workerRanking = false;
+            //     } else if (data[0] === "ranking") {
+            //         totalSchedules = progress;
+            //         workerRanking = true;
+            //     } else if (data[0] === "done") {
+            //         workerRanking = false;
+            //         finish();
+            //     }
+            //     if (!workerRanking) {
+            //         $message.text("Schedules Generated: " + progress);
+            //     } else {
+            //         $message.text("Ranking Progress: "
+            //             + (progress / totalSchedules).toFixed(2) + "%");
+            //     }
+            //     console.log(progress);
+            // }
+        }
+        // before the beginning of generation
+        var $genStatus = $("#generateStatus");
+        function start() {
+            $("#generate").addClass("hidden");
+            $("#generateStatus").removeClass("hidden");
+        }
+        // whenever a point of progress (e.g. new schedule calculated) occurs
+        function middle(progress) {
+            $("#generateStatus").text("Schedules Generated: " + progress);
+        }
         // when finished, show first, highest-ranked schedule
+        function finish() {
+            console.log("The cream-of-the-crop is %o.", schedules[0]);
+            $("#scheduleOutput").removeClass("hidden");
+            $("#generateStatus").addClass("hidden");
+            drawSchedule(schedules[0]);
+        }
     });
     $("#generateCancel").click(function() {
         console.log("Cancel Generating");
+        if (worker) {
+            worker.terminate();
+            workerRanking = false;
+        }
     });
 
-    function generate() {
-        g = new ScheduleGenerator(t, options,
-            preProcessFilter, processFilter, postProcessFilter);
+    function getCourseWithID(courses, courseID) {
+        for (var i = 0; i < courses.length; i++) {
+            if (courses[i].id == courseID) {
+                return courses[i];
+            }
+        }
+        return null;
+    }
+
+    function drawSchedule(schedule) {
+        purgeSchedule();
+        for (var i = 0; i < schedule.classes.getLength(); i++) {
+            drawClass(schedule.classes.at(i));
+        }
+    }
+    var classColorIndex = 0;
+    function drawClass(theClass) {
+        if (!classToColor[theClass.course.id]) {
+            classToColor[theClass.course.id] = COLORS[classColorIndex++];
+        }
+        var color = classToColor[theClass.course.id];
+        for (var i = 0; i < theClass.times.length; i++) {
+            drawClassTimeSlot(theClass.times[i], color,
+                theClass, timesToStr(theClass.times));
+        }
+    }
+    function drawClassTimeSlot(time, color, theClass, timeStr) {
+        var slot = $("#outputTimeSlotTemplate").get(0).cloneNode(true);
+        slot.id = "";
+        var $slot = $(slot);
+        $slot.removeClass("template");
+
+        // calculate the values
+        var day = time.day;
+        if (!getShowWeekends()) {
+            if (day == 0 || day == 6) {
+                return;
+            } else {
+                day -= 1;
+            }
+        }
+        // calculate values
+        var start = time.start;
+        var end = time.end;
+        const HEIGHT = 50;
+        const WIDTH_MARGIN = 1;
+        var width = (100 / (getShowWeekends() ? 7 : 5));
+        var left = width * day;
+        var top = HEIGHT *
+            ( (start.h - getMinTime()) + start.m / 60);
+        var height = HEIGHT *
+            ( (end.h - start.h) + (end.m - start.m) / 60 );
+        var millTime = getMillitaryTimePref();
+
+        // set the values
+        $slot.css({
+            left: "calc(" + left + "% + " + WIDTH_MARGIN + "px)",
+            top: top + "px",
+            height: height + "px",
+            width: "calc(" + width + "% - 2 * " + WIDTH_MARGIN + "px + 1px)",
+            backgroundColor: color
+        });
+        var course = theClass.course;
+        $slot.html(course.number + "&nbsp;" + course.name + "<br>"
+            + timeStr + "<br>Credits: " + course.credits);
+        $slot.attr("title", course.number + " " + course.name + "\n"
+            + timeStr + "\nCredits: " + course.credits + "\n\n"
+            + course.description);
+
+        $("#scheduleOutput > .scheduleForeground").append($slot);
+    }
+    function purgeSchedule() {
+        $("#scheduleOutput > .scheduleForeground").html(
+            $("#outputTimeSlotTemplate"));
+    }
+
+    var scheduleIndex = 0;
+    function nextSchedule() {
+        drawSchedule(schedules[++scheduleIndex]);
+    }
+    function prevSchedule() {
+        drawSchedule(schedules[--scheduleIndex]);
+    }
+    $(document.body).keydown(function(event) {
+        // console.log("event.which = " + event.which);
+        if (event.which == 39) { // right arrow
+            nextSchedule();
+        } else if (event.which == 37) {
+            prevSchedule();
+        }
+    });
+    function timesToStr(times) {
+        var str = DAYS[times[0].day].charAt(0);
+        for (var i = 1; i < times.length; i++) {
+            var lastTime = times[i - 1];
+            var curTime = times[i];
+            if (lastTime.start.h == curTime.start.h
+                    && lastTime.start.m == curTime.start.m
+                    && lastTime.end.h == curTime.end.h
+                    && lastTime.end.m == curTime.end.m) {
+                var d = DAYS[times[i].day];
+                str += (d == "Thu") ? "R" : d.charAt(0);
+            } else {
+                str += " " + strFromTime(lastTime.start) + "-"
+                    + strFromTime(lastTime.end) + ", ";
+            }
+        }
+        str += " " + strFromTime(lastTime.start) + "-"
+            + strFromTime(lastTime.end) + ", ";
+        return str.substr(0, str.length - 2);
     }
 });

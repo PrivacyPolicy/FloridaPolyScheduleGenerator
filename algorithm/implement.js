@@ -1,4 +1,4 @@
-var preProcessFilter = function(theClass) {
+var preProcessFilter = function(options, theClass) {
     // contains an unacceptable professor
     if (options.professors[theClass.professor] == pref.unacceptable &&
             options.professors[theClass.professor] != null) {
@@ -78,7 +78,7 @@ var preProcessFilter = function(theClass) {
 
 
 
-var processFilter = function(schedule) {
+var processFilter = function(options, schedule) {
     // not over the credit limit
     if (schedule.calculateCredits() >
             options.creditRange.maxValue) {
@@ -100,7 +100,7 @@ var processFilter = function(schedule) {
 
 
 
-var postProcessFilter = function(schedule) {
+var postProcessFilter = function(options, schedule) {
     // doesn't meet the credit minimum
     if (schedule.calculateCredits() <
             options.creditRange.minValue) {

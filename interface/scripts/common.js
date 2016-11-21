@@ -31,7 +31,7 @@ $(function() {
         url: JSON_URL,
         dataType: "json"
     });
-    
+
     function init() {
         // do some step-specific stuff at startup
         purgeMajor();
@@ -42,11 +42,28 @@ $(function() {
 
         // remove loading from center of screen
         $("#loading").addClass("hidden");
-        
+
         // Go to the url's recomended step
         var hash = parseInt(document.location.hash.substr(5));
         if (isNaN(hash)) hash = 1;
         toStep(hash - 1);
     }
-    
+
 });
+
+const COLORS = [
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "blue",
+    "purple",
+    "pink",
+    "lightgray",
+    "magenta",
+    "maroon",
+    "cyan",
+    "skyblue",
+    "aquamarine",
+    "violet"
+]

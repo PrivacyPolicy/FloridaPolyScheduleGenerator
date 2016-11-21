@@ -95,8 +95,10 @@ function Course(
     this.color = color;
 
     this._classList = classList;
-    for (var i = 0; i < classList.getLength(); i++) {
-        classList.at(i).course = this;
+    if (classList !== undefined) {
+        for (var i = 0; i < this._classList.getLength(); i++) {
+            this._classList.at(i).course = this;
+        }
     }
 
     this.getClassList = function() {
@@ -204,7 +206,7 @@ function CourseList(defaultCourses) {
                 return i;
             }
         }
-        console.error("Invalid ClassList ID: " + courseID);
+        console.error("Invalid CourseList ID: " + courseID);
         console.error(new Error().stack);
         return -1;
     };
@@ -259,7 +261,7 @@ function CourseList(defaultCourses) {
     this.toString = function() {
         var str = "[";
         for (var i = 0; i < this._courses.length; i++) {
-            str += "Class{id:" + this._courses[i].id + "}";
+            str += "Course{id:" + this._courses[i].id + "}";
             if (i < this._courses.length - 1) {
                 str += ", ";
             }
@@ -268,10 +270,10 @@ function CourseList(defaultCourses) {
     };
 }
 
-// Calculate how many other classes depend on each class
-function calculatePostReqCounts(classes) {
-    // TODO: iterate through each class, find how many
-    // classes depend on it (using dynamic programming,
+// Calculate how many other courses depend on each course
+function calculatePostReqCounts(courses) {
+    // TODO: iterate through each course, find how many
+    // courses depend on it (using dynamic programming,
     // recursive backtracking)
     // Note: coReqs do not count toward the postReqCount
 }
@@ -375,7 +377,8 @@ function Options() {
         maxValue: 20,
         favoredValue: 15
     };
-    this.timesNeutral = [ // default: 8:00AM-6:00PM M-F
+    this._defaultTimes = true;
+    this.timesUnfavored = [ // default: 8:00AM-6:00PM M-F
         new Time(1, 8, 0, 9, 0),
         new Time(1, 17, 0, 18, 0),
         new Time(2, 8, 0, 9, 0),
@@ -387,7 +390,7 @@ function Options() {
         new Time(5, 8, 0, 9, 0),
         new Time(5, 17, 0, 18, 0)
     ];
-    this.timesFavored = [ // default: 9:00AM-5:00PM M-R
+    this.timesNeutral = [ // default: 9:00AM-5:00PM M-R
         new Time(1, 9, 0, 17, 0),
         new Time(2, 9, 0, 17, 0),
         new Time(3, 9, 0, 17, 0),
@@ -396,13 +399,13 @@ function Options() {
     this.professors = {};
 
     // functions
-    this.setCoursePreference = function(classID, preferrence) {
+    this.setCoursePreference = function(courseID, preferrence) {
         if (preferrence == pref.favored) {
-            this.coursesFavored.push(classID);
+            this.coursesFavored.push(courseID);
         } else if (preferrence == pref.unfavored) {
-            this.coursesUnfavored.push(classID);
+            this.coursesUnfavored.push(courseID);
         } else if (preferrence == pref.required) {
-            this.coursesRequired.push(classID);
+            this.coursesRequired.push(courseID);
         }
     }
     this.setCreditMin = function(value) {
@@ -414,11 +417,21 @@ function Options() {
     this.setCreditFavoredValue = function(value) {
         this.creditRange.favoredValue = value;
     };
-    this.addUnfavoredTime = function(time) {
-        this.timesUnfavored.push(time);
+    this.addNeutralTime = function(time) {
+        if (this._defaultTimes) {
+            this._defaultTimes = false;
+            this.timesUnfavored = [];
+            this.timesNeutral = [];
+        }
+        this.timesNeutral.push(time);
     };
-    this.addFavoredTime = function(time) {
-        this.timesFavored.push(time);
+    this.addUnfavoredTime = function(time) {
+        if (this._defaultTimes) {
+            this._defaultTimes = false;
+            this.timesUnfavored = [];
+            this.timesNeutral = [];
+        }
+        this.timesUnfavored.push(time);
     };
     this.setProfessorPreference = function(professor, preferrence) {
         this.professors[professor] = preferrence;
@@ -441,9 +454,9 @@ function Options() {
             (hide) ? pref.unacceptable : pref.neutral);
     };
 
-    this.hideOtherMajorClasses = true;
-    this.setHideOtherMajorClasses = function(hide) {
-        this.hideOtherMajorClasses = hide;
+    this.hideOtherMajorCourses = true;
+    this.setHideOtherMajorCourses = function(hide) {
+        this.hideOtherMajorCourses = hide;
     };
 
     this.hideFullClasses = true;
