@@ -36,7 +36,6 @@
             <div>Step 2</div>
             <div>Step 3</div>
             <div>Step 4</div>
-            <div>Step 5</div>
             <div>Final</div>
         </nav>
         <main>
@@ -45,25 +44,30 @@
                 <!-- Major, Concentration, Classes Taken -->
                 <div id=step1 class=step>
 
-                  <h1>Major</h1>
-                  <select id=selectMajor>
-                    <option>Select one...</option>
-                  </select>
-                  <br><br>
+                    <h1>Major</h1>
+                    <select id=selectMajor>
+                        <option>Select one...</option>
+                    </select>
+                    <br><br>
 
-                  <h1>Concentration</h1>
-                  <select id=selectConcentration disabled>
-                    <option>Select one...</option>
-                  </select>
-                  <br><br>
+                    <h1>Concentration</h1>
+                    <select id=selectConcentration disabled>
+                        <option>Select one...</option>
+                    </select>
+                    <br><br>
 
-                  <h1>Courses Taken</h1>
+                    <h1>Courses Taken</h1>
                     <div id=chooseCourses>
                         <div id=courseTemplate class="course template">
                             <input type=checkbox>
                             <span class=courseName></span>
                         </div>
                     </div>
+                    <br><br>
+
+                    <a href="#" id=showAdvancedOption>
+                        Show advanced settings</a>
+
                 </div>
 
                 <!-- Schedule (times) -->
@@ -102,8 +106,12 @@
                     <button id=scheduleReset>Reset</button>
                 </div>
 
-                <!-- Courses (favored/unfavored)  -->
+                <!-- Credits + Courses (favored/unfavored)  -->
                 <div id=step3 class=step>
+                    <h1>Credit hours:</h1>
+                    Min: <input type=number value=12 id=creditMin><br>
+                    Goal: <input type=number value=15 id=creditGoal><br>
+                    Max: <input type=number value=18 id=creditMax>
                     <h1>Course Preferences</h1>
                     <div id=coursePrefs>
                         <div class="coursePref template">
@@ -129,14 +137,6 @@
 
                 <!-- Professors (favored/unfavored) -->
                 <div id=step4 class=step>
-                </div>
-
-                <!-- Extras/Other -->
-                <div id=step5 class=step>
-                    Credit hours (temp)<br>
-                    Min: <input type=number value=12 id=creditMin><br>
-                    Goal: <input type=number value=15 id=creditGoal><br>
-                    Max: <input type=number value=18 id=creditMax>
                 </div>
 
                 <!-- Show Schedules -->

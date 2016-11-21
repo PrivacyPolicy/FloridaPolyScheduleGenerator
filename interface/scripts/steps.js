@@ -248,3 +248,12 @@ function getCoursePrefsFromStorage() {
         return null;
     }
 }
+
+
+
+// Step 5
+function step5Init() {
+    $("#generate").removeClass("hidden");
+    $("#scheduleOutput").addClass("hidden");
+    $("#generateStatus").addClass("hidden");
+}
