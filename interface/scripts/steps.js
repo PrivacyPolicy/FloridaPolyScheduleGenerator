@@ -137,7 +137,7 @@ function step3Init() {
     purgeCoursePrefs();
     loop1: for (var i = 0; i < courses.length; i++) {
         var course = courses[i];
-        
+
         // if already taken
         if (courseWasTaken(takenCourses, course.id)) continue;
         // if elective already taken
@@ -161,11 +161,12 @@ function step3Init() {
                 }
             }
         }
-        
+
         // must be okay
         addCoursePref(data, course);
     }
     loadCoursePrefsFromStorage();
+    saveCoursePrefsToStorage();
     $("#step3 input[type=radio]").click(function(event) {
         saveCoursePrefsToStorage();
     });

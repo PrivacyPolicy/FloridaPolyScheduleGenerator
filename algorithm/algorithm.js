@@ -1,8 +1,8 @@
 function ScheduleGenerator(
-        classes, options,
+        courses, options,
         preProcessFilter, processFilter, postProcessFilter) {
-    this.all_classes = classes;
-    this.classes = null;
+    this.all_courses = courses;
+    this.courses = null;
     this.options = options;
 
     this.preProcessFilter = preProcessFilter;
@@ -30,10 +30,10 @@ function ScheduleGenerator(
         var buildSchedule = new Schedule();
         this.schedules = [];
         this.preProcessClasses();
-        // (Dynamic Programming) used to remember previous
-        // calculations when two classes didn't work before
-        this.collisionMatrix = new SymmetricMatrix(
-            this.all_classes.getLength(), collType.unknown);
+        // // (Dynamic Programming) used to remember previous
+        // // calculations when two classes didn't work before
+        // this.collisionMatrix = new SymmetricMatrix(
+        //     this.all_courses.getLength(), collType.unknown);
         // Don't bother calculating schedules where a required class
         // isn't in the schedule
         if (options.coursesRequired.length > 0) {
@@ -46,31 +46,36 @@ function ScheduleGenerator(
         this.calculationTime = (Date.now() - this.calculationTime) / 1000;
         return this.schedules;
     };
+    // favored times should be considered acceptable by the algorithm
+    options.timesNeutral = options.timesNeutral.concat(options.timesFavored);
 
     // remove any classes that would never work in the first place
     this.preProcessClasses = function() {
-        this.classes = this.all_classes.copy();
-        for (var i = this.classes.getLength() - 1; i >= 0; i--) {
-            if (!this.preProcessFilter(this.classes.at(i))) {
-                this.classes.removeAt(i);
+        this.courses = this.all_courses.copy();
+        for (var c = this.courses.getLength() - 1; c >= 0; c--) {
+            var classes = this.courses.at(c).getClassList();
+            for (var i = classes.getLength() - 1; i >= 0; i--) {
+                if (!this.preProcessFilter(classes.at(i))) {
+                    classes.removeAt(i);
+                }
+            }
+            if (classes.getLength() == 0) {
+                this.courses.removeAt(c);
             }
         }
-        // sort with must-have classes first to find those
+        // sort with must-have courses first to find those
         // collisions fastest (reduces computation time)
         var lastInd = 0;
-        for (var i = this.classes.getLength() - 1; i >= lastInd; i--) {
+        for (var c = this.courses.getLength() - 1; c >= lastInd; c--) {
             if (this.options.coursesRequired.indexOf(
-                    this.classes.at(i).course.id) > -1) {
-                // move to the start of the array
-                this.classes.moveToFront(i);
+                    this.courses.at(c).id) > -1) {
+                this.courses.moveToFront(i);
                 lastInd++;
             }
         }
-        // favored times should be considered acceptable by the algorithm
-        this.timesNeutral = this.timesNeutral.concat(this.timesFavored);
     };
 
-    // remove any residual classes that passed but are still bad
+    // remove any residual classes that passed but are overall bad
     this.postProcessSchedules = function() {
         for (var i = 0; i < this.schedules.length; i++) {
             this.schedules[i].calculateCredits();
@@ -86,16 +91,30 @@ function ScheduleGenerator(
 
     // the core of this API, the recursive-backtracking
     // function that generates the schedules
-    this.recGenerateSchedules = function(buildSchedule, classInd) {
+    this.recGenerateSchedules = function(buildSchedule, courseInd) {
+        // if (this.isCompleteSchedule(buildSchedule)) {
+        //     this.schedules.push(buildSchedule.copy());
+        // }
+        // for (var i = classInd; i < this.classes.getLength(); i++) {
+        //     if (this.nextStepIsValid(buildSchedule, i)) {
+        //         this.addClass(buildSchedule, i);
+        //         // recursive call:
+        //         this.recGenerateSchedules(buildSchedule, i + 1);
+        //         this.removeClass(buildSchedule, i);
+        //     }
+        // }
         if (this.isCompleteSchedule(buildSchedule)) {
             this.schedules.push(buildSchedule.copy());
         }
-        for (var i = classInd; i < this.classes.getLength(); i++) {
-            if (this.nextStepIsValid(buildSchedule, i)) {
-                this.addClass(buildSchedule, i);
-                // recursive call:
-                this.recGenerateSchedules(buildSchedule, i + 1);
-                this.removeClass(buildSchedule, i);
+        for (var i = courseInd; i < this.courses.getLength(); i++) {
+            var classList = this.courses.at(i).getClassList();
+            for (var j = 0; j < classList.getLength(); j++) {
+                if (this.nextStepIsValid(buildSchedule, i, j)) {
+                    this.addClass(buildSchedule, i, j);
+                    // recursive call:
+                    this.recGenerateSchedules(buildSchedule, i + 1);
+                    this.removeClass(buildSchedule, i, j);
+                }
             }
         }
     };
@@ -108,59 +127,52 @@ function ScheduleGenerator(
     };
 
     // if, upon adding this class, the schedule would be valid
-    this.nextStepIsValid = function(schedule, classInd) {
+    this.nextStepIsValid = function(schedule, courseInd, classInd) {
         // add class to a copied schedule
         var scheduleCopy = schedule.copy();
-        this.addClass(scheduleCopy, classInd);
+        this.addClass(scheduleCopy, courseInd, classInd);
 
-        // ensure that another of the same course doesn't exist
-        var lastInd = schedule.classes.getLength() - 1;
-        if (lastInd > -1) {
-            var lastCourse = schedule.classes.getLastItem().course;
-            for (var i = 0; i < lastInd; i++) {
-                if (schedule.classes.at(i).course == lastCourse) return false;
-            }
-        }
-
-        // determine if there's collision on the new class using the
-        // collision matrix (Dynamic Programming) or just by calculating
-        var lastInd = scheduleCopy.classes.getLength() - 1;
-        var lastID = scheduleCopy.classes.at(lastInd).id;
-        // the location of the class with id in all_classes
-        var allInd_lastInd = this.all_classes.getInd(lastID);
-        for (var i = 0; i < lastInd; i++) {
-            var iID = scheduleCopy.classes.at(i).id;
-            var allInd_i = this.all_classes.getInd(iID);
-            var collision =
-                this.collisionMatrix.get(allInd_i, allInd_lastInd);
-            if (collision == collType.collision) {
-                // we already calculated collision before
-                return false;
-            } else if (collision == collType.unknown) {
-                // uncalculated; calculate and store the answer
-                collision = this.checkCollision(
-                    scheduleCopy.classes.at(i).times,
-                    scheduleCopy.classes.at(lastInd).times);
-                this.collisionMatrix.set(allInd_i, allInd_lastInd, collision);
-                if (collision == collType.collision) return false;
-            }
-            // else, compatible (no collision); move on
-        }
-        // Using no collision matrix: test and see if it's even worth it
+        // // determine if there's collision on the new class using the
+        // // collision matrix (Dynamic Programming) or just by calculating
+        // var lastInd = scheduleCopy.classes.getLength() - 1;
+        // var lastID = scheduleCopy.classes.at(lastInd).id;
+        // // the location of the class with id in all_classes
+        // var allInd_lastInd = this.all_classes.getInd(lastID);
         // for (var i = 0; i < lastInd; i++) {
-        //     var collision = this.checkCollision(
-        //         scheduleCopy.classes.at(i).times,
-        //         scheduleCopy.classes.at(lastInd).times);
-        //     if (collision == collType.collision) return false;
+        //     var iID = scheduleCopy.classes.at(i).id;
+        //     var allInd_i = this.all_classes.getInd(iID);
+        //     var collision =
+        //         this.collisionMatrix.get(allInd_i, allInd_lastInd);
+        //     if (collision == collType.collision) {
+        //         // we already calculated collision before
+        //         return false;
+        //     } else if (collision == collType.unknown) {
+        //         // uncalculated; calculate and store the answer
+        //         collision = this.checkCollision(
+        //             scheduleCopy.classes.at(i).times,
+        //             scheduleCopy.classes.at(lastInd).times);
+        //         this.collisionMatrix.set(allInd_i, allInd_lastInd, collision);
+        //         if (collision == collType.collision) return false;
+        //     }
+        //     // else, compatible (no collision); move on
         // }
+        // Using no collision matrix: test and see if it's even worth it
+        var lastInd = scheduleCopy.classes.getLength() - 1;
+        for (var i = 0; i < lastInd; i++) {
+            var collision = this.checkCollision(
+                scheduleCopy.classes.at(i).times,
+                scheduleCopy.classes.at(lastInd).times);
+            if (collision == collType.collision) return false;
+        }
         return processFilter(scheduleCopy);
     };
 
     // add the class to the schedule's class list
-    this.addClass = function(schedule, classInd) {
-        var theClass = this.classes.at(classInd);
+    this.addClass = function(schedule, courseInd, classInd) {
+        var theClass = this.courses.at(courseInd).getClassList().at(classInd);
         if (theClass == null) {
-            console.error("Invalid schedule class index: " + classInd);
+            console.error("Invalid schedule course/class index: "
+                + courseInd + "/" + classInd);
             return;
         } else {
             schedule.addClass(theClass);
@@ -168,8 +180,8 @@ function ScheduleGenerator(
     };
 
     // remove the class from the schedule's class list
-    this.removeClass = function(schedule, classInd) {
-        schedule.removeClass(this.classes.at(classInd));
+    this.removeClass = function(schedule, courseInd, classInd) {
+        schedule.removeClass(this.courses.at(courseInd).getClassList().at(classInd));
     };
 
     // compute if there's collision between two classes' times

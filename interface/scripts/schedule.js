@@ -288,7 +288,7 @@ function addEventListeners() {
 
     function moveHandleBtmRespond(elem, origX, origY, offsetX, offsetY){
         var newY = origY + offsetY;
-        var maxY = $("#scheduleForeground").height();
+        var maxY = $(elem).parent().parent().height();
         var elemTop = parseInt($(elem).parent().css("top"));
         if (newY + elemTop > maxY) newY = maxY - elemTop;
         if (newY <= origY - origHeight) newY = origY - origHeight;
@@ -307,7 +307,7 @@ function addEventListeners() {
 
     function endHandleBtmRespond(elem, origX, origY, offsetX, offsetY) {
         var newY = origY + offsetY;
-        var maxY = $("#scheduleForeground").height();
+        var maxY = $(elem).parent().parent().height();
         var elemTop = parseInt($(elem).parent().css("top"));
         if (newY + elemTop > maxY) newY = maxY - elemTop;
 

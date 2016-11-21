@@ -10,4 +10,9 @@ $(function() {
     $("#generateCancel").click(function() {
         console.log("Cancel Generating");
     });
+
+    function generate() {
+        g = new ScheduleGenerator(t, options,
+            preProcessFilter, processFilter, postProcessFilter);
+    }
 });

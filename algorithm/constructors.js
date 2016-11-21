@@ -78,7 +78,8 @@ function Class(
 function Course(
         id, number, name, credits,
         preReqs, coReqs, electivesInGroup,
-        color) {
+        color,
+        classList) {
     // primary data about course
     this.id = id;
     this.number = number;
@@ -92,11 +93,25 @@ function Course(
 
     // data about the appearance of the class blocks
     this.color = color;
+
+    this._classList = classList;
+    for (var i = 0; i < classList.getLength(); i++) {
+        classList.at(i).course = this;
+    }
+
+    this.getClassList = function() {
+        return this._classList;
+    };
+
+    this.addClass = function(theClass) {
+        this._classList.add(theClass);
+        this._classList.get(theClass.id).course = this;
+    };
 }
 
 // list of classes with easy accessors/manipulators
-function ClassList() {
-    this._classes = [];
+function ClassList(defaultClasses) {
+    this._classes = defaultClasses || [];
 
     this.add = function(classObj) {
         this._classes.push(classObj);
@@ -173,6 +188,84 @@ function ClassList() {
 
     // TODO: consider using binary search/insert to speed things up a bit
     // May not be possible now with moveToFront()...
+}
+
+// list of classes with easy accessors/manipulators
+function CourseList(defaultCourses) {
+    this._courses = defaultCourses || [];
+
+    this.add = function(courseObj) {
+        this._courses.push(courseObj);
+    };
+
+    this.getInd = function(courseID) {
+        for (var i = 0; i < this._courses.length; i++) {
+            if (this._courses[i].id == courseID) {
+                return i;
+            }
+        }
+        console.error("Invalid ClassList ID: " + courseID);
+        console.error(new Error().stack);
+        return -1;
+    };
+
+    this.get = function(courseID) {
+        var ind = this.getInd(courseID);
+        return (ind > -1) ? this._courses[ind] : null;
+    };
+
+    this.at = function(ind) {
+        return this._courses[ind];
+    };
+
+    this.remove = function(courseID) {
+        var ind = this.getInd(courseID);
+        if (ind > -1) {
+            this.removeAt(ind);
+        }
+    };
+
+    this.removeAt = function(ind) {
+        this._courses.splice(ind, 1);
+    };
+
+    this.moveToFront = function(ind) {
+        this._courses.unshift(this._courses.splice(ind, 1)[0]);
+    };
+
+    this.getLastItem = function() {
+        return this._courses[this._courses.length - 1];
+    };
+
+    this.exists = function(courseID) {
+        for (var i = 0; i < this._courses.length; i++) {
+            if (this._courses[i].id == courseID) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    this.copy = function() {
+        var listCopy = new CourseList();
+        listCopy._courses = this._courses.slice();
+        return listCopy;
+    };
+
+    this.getLength = function() {
+        return this._courses.length;
+    };
+
+    this.toString = function() {
+        var str = "[";
+        for (var i = 0; i < this._courses.length; i++) {
+            str += "Class{id:" + this._courses[i].id + "}";
+            if (i < this._courses.length - 1) {
+                str += ", ";
+            }
+        }
+        return str + "]";
+    };
 }
 
 // Calculate how many other classes depend on each class
