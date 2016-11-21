@@ -52,18 +52,12 @@ $(function() {
 });
 
 const COLORS = [
-    "red",
-    "orange",
-    "yellow",
-    "green",
-    "blue",
-    "purple",
-    "pink",
-    "lightgray",
-    "magenta",
-    "maroon",
-    "cyan",
-    "skyblue",
-    "aquamarine",
-    "violet"
+    "#ED0A3F", "#FF861F", "#FBE870", "#C5E17A", "#01A368",
+    "#76D7EA", "#76D7EA", "#8359A3", "#AF593E", "#A36F40",
+    "#FFAE42", "#FA9D5A", "#CD919E", "#FF3F34", "#CA3435",
+    "#F653A6", "#0A6B0D", "#8B8680", "#03BB85", "#FFDF00",
+    "#A78B00", "#788193", "#0095B6", "#C32148", "#01796F",
+    "#E96792", "#FF91A4", "#6CDAE7", "#FFC800", "#BC6CAC",
+    "#DCCCD7", "#EBE1C2", "#A6AAAE", "#B99685", "#0086A7",
+    "#BC8777"
 ]
