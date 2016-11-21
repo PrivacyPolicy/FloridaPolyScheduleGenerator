@@ -139,26 +139,33 @@ function step3Init() {
         var course = courses[i];
 
         // if already taken
-        if (courseWasTaken(takenCourses, course.id)) continue;
+        if (courseWasTaken(takenCourses, course.id)) {
+            continue loop1;
+        }
         // if elective already taken
         if (!getAllowMultipleElectives()) {
             for (var elective in course.electivesInGroup) {
                 var c = course.electivesInGroup[elective];
-                if (courseWasTaken(takenCourses, c)) continue loop1;
+                if (courseWasTaken(takenCourses, c)) {
+                    continue loop1;
+                }
             }
         }
         // if prereqs not met
-        for (var prereq in course.prereqs) {
+        loop2: for (var prereq in course.prereqs) {
             var c = course.prereqs[prereq];
             if (typeof c == "number") {
-                if (!courseWasTaken(takenCourses, c)) continue loop1;
+                if (!courseWasTaken(takenCourses, c)) {
+                    continue loop1;
+                }
             } else { // array, so OR them
                 // if at least one is being taken, we're good
                 for (var orPrereq in c) {
                     if (courseWasTaken(takenCourses, c[orPrereq])) {
-                        break;
+                        continue loop2;
                     }
                 }
+                continue loop1;
             }
         }
 

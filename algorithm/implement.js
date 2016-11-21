@@ -12,9 +12,9 @@ var preProcessFilter = function(options, theClass) {
         var time = options.timesNeutral[i];
         var start = time.start.h * 100 + time.start.m;
         var end = time.end.h * 100 + time.end.m;
-        if (!timeCoverage[time.day]) {
-            timeCoverage[time.day] = [];
-        }
+            if (!timeCoverage[time.day]) {
+                timeCoverage[time.day] = [];
+            }
         while (start < end) {
             timeCoverage[time.day][start] = true;
             start += 15;
