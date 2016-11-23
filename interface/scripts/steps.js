@@ -8,7 +8,7 @@ $(function() {
         var value = event.target.value;
         if (value != DEFAULT_SELECT) {
             $concentration.prop("disabled", false);
-            for (conc in jsonData[event.target.value]) {
+            for (conc in jsonCourseData[event.target.value]) {
                 addConcentration(conc);
             }
         } else {
@@ -20,7 +20,7 @@ $(function() {
         var value = event.target.value;
         purgeCourses();
         if (value != DEFAULT_SELECT) {
-            var data = jsonData[$major.val()][value];
+            var data = jsonCourseData[$major.val()][value];
             for (var course in data) {
                 addCourse(data[course]);
             }
@@ -133,7 +133,7 @@ function step3Init() {
         return;
     }
     var takenCourses = data.courses;
-    var courses = jsonData[data.major][data.concentration];
+    var courses = jsonCourseData[data.major][data.concentration];
     purgeCoursePrefs();
     loop1: for (var i = 0; i < courses.length; i++) {
         var course = courses[i];
@@ -185,7 +185,7 @@ function getAllowMultipleElectives() {
     return false;
 }
 function addCoursePref(data, coursePrefObj) {
-    var courses = jsonData[data.major][data.concentration];
+    var courses = jsonCourseData[data.major][data.concentration];
     for (var course in courses) {
         if (courses[course].id == coursePrefObj.id) break;
     }

@@ -1,52 +1,82 @@
 const ID = "FLORIDA_POLYTECHNIC_SCHEDULE_GENERATOR";
 const STEP = "STEP";
 const DEFAULT_SELECT = "Select one...";
-var jsonData = {};
+var jsonCourseData = {}, jsonClassData = {};
 
 // Load the course data from the scraped JSON
 $(function() {
-    const JSON_URL = "external/output.json";
+    const COURSE_URL = "external/output.json";
+    const CLASS_URL = "external/class_output.json";
     var $major = $("#selectMajor"),
         $concentration = $("#selectConcentration"),
         $courses = $("#chooseCourses");
+
+    // load course data from external file
     $.ajax({
         success: function(data, textStatus, jqXHR) {
             if (typeof data == "object") {
-                jsonData = data;
+                jsonCourseData = data;
                 init();
             } else {
-                console.error("Data loaded is not JSON");
+                console.error("Course data loaded is not JSON");
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
             if (errorThrown == "") {
                 // not using a server, using a file system
-                jsonData = tempBackCompData;
+                jsonCourseData = tempBackCompData;
                 init();
             } else {
                 console.error("JSON course data failed to load: "
                               + errorThrown + ", " + textStatus);
             }
         },
-        url: JSON_URL,
+        url: COURSE_URL,
         dataType: "json"
     });
 
+    // load class data from external file
+    $.ajax({
+        success: function(data, textStatus, jqXHR) {
+            if (typeof data == "object") {
+                jsonClassData = data;
+                init();
+            } else {
+                console.error("Class data loaded is not JSON");
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            if (errorThrown == "") {
+                // not using a server, using a file system
+                jsonClassData = tempBackCompDataClasses;
+                init();
+            } else {
+                console.error("JSON class data failed to load: "
+                                + errorThrown + ", " + textStatus)
+            }
+        },
+        url: CLASS_URL,
+        dataType: "json"
+    })
+
+    var downloadedFiles = 0;
     function init() {
-        // do some step-specific stuff at startup
-        purgeMajor();
-        for (major in jsonData) {
-            addMajor(major);
+        if (++downloadedFiles == 2) {
+            // do some step-specific stuff at startup
+            purgeMajor();
+            for (major in jsonCourseData) {
+                addMajor(major);
+            }
+            loadCoursesFromStorage();
+
+            // remove loading from center of screen
+            $("#loading").addClass("hidden");
+
+            // Go to the url's recomended step
+            var hash = parseInt(document.location.hash.substr(5));
+            if (isNaN(hash)) hash = 1;
+            toStep(hash - 1);
         }
-        loadCoursesFromStorage();
-
-        // remove loading from center of screen
-        $("#loading").addClass("hidden");
-
-        // Go to the url's recomended step
-        var hash = parseInt(document.location.hash.substr(5));
-        if (isNaN(hash)) hash = 1;
-        toStep(hash - 1);
     }
 
 });
