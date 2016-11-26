@@ -230,7 +230,7 @@ function loadCoursePrefsFromStorage() {
     $(".coursePref:not(.template)").each(function(i, elem) {
         var $elem = $(elem);
         var thePref = data[$elem.attr("id")];
-        if (!thePref) return;
+        if (thePref == undefined) return;
         if (thePref == pref.unacceptable) {
             $elem.find(".unacceptable").click();
         } else if (thePref == pref.unfavored) {
