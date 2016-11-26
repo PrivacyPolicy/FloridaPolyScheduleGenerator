@@ -219,9 +219,8 @@ function saveCoursePrefsToStorage() {
     var object = {};
     $(".coursePref:not(.template)").each(function(i, elem) {
         var $elem = $(elem);
-        object[$elem.attr("id")] = {
-            "pref": pref[$elem.find(":checked + label")[0].classList[0]]
-        };
+        object[$elem.attr("id")] =
+            pref[$elem.find(":checked + label")[0].classList[0]];
     });
     localStorage[ID + "_" + STEP + "3"] = JSON.stringify(object);
 }
@@ -230,9 +229,8 @@ function loadCoursePrefsFromStorage() {
     if (!data) return {};
     $(".coursePref:not(.template)").each(function(i, elem) {
         var $elem = $(elem);
-        var theData = data[$elem.attr("id")];
-        if (!theData) return;
-        var thePref = theData.pref;
+        var thePref = data[$elem.attr("id")];
+        if (!thePref) return;
         if (thePref == pref.unacceptable) {
             $elem.find(".unacceptable").click();
         } else if (thePref == pref.unfavored) {

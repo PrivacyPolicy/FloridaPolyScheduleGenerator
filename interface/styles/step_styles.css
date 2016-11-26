@@ -29,12 +29,12 @@
     padding: .2em;
     background: lightgray;
 }
-.coursePref > input[type=radio] + label.favored {
+.coursePref > input[type=radio] + label.required {
     border-right: 0;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
 }
-.coursePref > input[type=radio] + label.neutral {
+.coursePref > input[type=radio] + label.favored {
     border-radius: 0;
 }
 .coursePref > input[type=radio] + label.unfavored {
@@ -45,10 +45,10 @@
 .coursePref > input[type=radio]:checked + label.unfavored {
     background: red;
 }
-.coursePref > input[type=radio]:checked + label.neutral {
+.coursePref > input[type=radio]:checked + label.favored {
     background: yellow;
 }
-.coursePref > input[type=radio]:checked + label.favored {
+.coursePref > input[type=radio]:checked + label.required {
     background: lime;
 }
 .coursePref > input[type=radio]:focus + label {

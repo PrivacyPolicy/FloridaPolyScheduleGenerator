@@ -9,13 +9,12 @@ $(function() {
         // load time preferences from step 2
         var dataTimes = getTimesFromStorage();
         for (var i in dataTimes) {
-            var pref = dataTimes[i].pref;
             var time = dataTimes[i].time;
             var timeObj = new Time(time.day, time.start.h,
                 time.start.m, time.end.h, time.end.m);
-            if (time.pref == pref.unfavored) {
+            if (dataTimes[i].pref == pref.unfavored) {
                 options.addUnfavoredTime(timeObj);
-            } else if (time.pref == pref.neutral) {
+            } else if (dataTimes[i].pref == pref.neutral) {
                 options.addNeutralTime(timeObj);
             }
         }
@@ -23,8 +22,8 @@ $(function() {
         var dataCoursePrefs = getCoursePrefsFromStorage();
         for (var i in dataCoursePrefs) {
             var id = parseInt(i.split("-")[1]);
-            var pref = dataCoursePrefs[i];
-            options.setCoursePreference(id, pref);
+            var thePref = dataCoursePrefs[i];
+            options.setCoursePreference(id, thePref);
         }
         // load credit range prefs from step ?
         options.setCreditMin(parseInt($("#creditMin").val()));
@@ -222,10 +221,10 @@ $(function() {
 
     var scheduleIndex = 0;
     function nextSchedule() {
-        drawSchedule(schedules[++scheduleIndex]);
+        drawSchedule(schedules[++scheduleIndex % schedules.length]);
     }
     function prevSchedule() {
-        drawSchedule(schedules[--scheduleIndex]);
+        drawSchedule(schedules[--scheduleIndex % schedules.length]);
     }
     $(document.body).keydown(function(event) {
         // console.log("event.which = " + event.which);

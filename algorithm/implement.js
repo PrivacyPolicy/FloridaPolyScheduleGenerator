@@ -86,12 +86,14 @@ var processFilter = function(options, schedule) {
         return false;
     }
     // ensure there are no two electives together
-    for (var i = 0; i < schedule.classes.getLength(); i++) {
-        var electiveGroup = schedule.classes.at(i).course.electivesInGroup;
-        for (var j = 0; j < electiveGroup.length; j++) {
-            if (schedule.classes.exists(electiveGroup[j])) {
-                report("Schedule", "it has two electives in the same group");
-                return false;
+    if (!options.multipleElectives) {
+        for (var i = 0; i < schedule.classes.getLength(); i++) {
+            var electiveGroup = schedule.classes.at(i).course.electivesInGroup;
+            for (var j = 0; j < electiveGroup.length; j++) {
+                if (schedule.classes.exists(electiveGroup[j])) {
+                    report("Schedule", "it has elective conflicts");
+                    return false;
+                }
             }
         }
     }

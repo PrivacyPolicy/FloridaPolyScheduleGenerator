@@ -71,7 +71,7 @@ function ScheduleGenerator(
         for (var c = this.courses.getLength() - 1; c >= lastInd; c--) {
             if (this.options.coursesRequired.indexOf(
                     this.courses.at(c).id) > -1) {
-                this.courses.moveToFront(i);
+                this.courses.moveToFront(c);
                 lastInd++;
             }
         }
