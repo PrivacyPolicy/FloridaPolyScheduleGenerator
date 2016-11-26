@@ -258,6 +258,7 @@ $(function() {
 
     const DAY_TO_INT = {"M": 1, "T": 2, "W": 3, "R": 4, "F": 5};
     function sectionToClass(courseNumber, sectionObj) {
+        courseNumber = parseInt(courseNumber.substr(3)) + "";
         var id = parseInt(courseNumber + sectionObj.section);
         var times = [];
         var professors = [], rooms = [];

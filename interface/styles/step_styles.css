@@ -29,7 +29,7 @@
     padding: .2em;
     background: lightgray;
 }
-.coursePref > input[type=radio] + label.unfavored {
+.coursePref > input[type=radio] + label.favored {
     border-right: 0;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
@@ -37,7 +37,7 @@
 .coursePref > input[type=radio] + label.neutral {
     border-radius: 0;
 }
-.coursePref > input[type=radio] + label.favored {
+.coursePref > input[type=radio] + label.unfavored {
     border-left: 0;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
