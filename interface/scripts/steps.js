@@ -119,6 +119,7 @@ function getCoursesFromStorage() {
 // advanced settings
 $(function() {
     loadAdvancedFromStorage();
+    saveAdvancedToStorage();
     $("#advancedSettings > input").change(function(event) {
         saveAdvancedToStorage();
     });
@@ -188,6 +189,10 @@ function step3Init() {
     purgeCoursePrefs();
     // get advanced settings
     var advanced = getAdvancedFromStorage();
+    var allowMultipleElectives = true;
+    if (advanced != null) {
+        allowMultipleElectives = advanced["checkMultipleElectives"];
+    }
 
     loop1: for (var i = 0; i < courses.length; i++) {
         var course = courses[i];
@@ -197,7 +202,7 @@ function step3Init() {
             continue loop1;
         }
         // if elective already taken
-        if (!advanced["checkMultipleElectives"]) {
+        if (!allowMultipleElectives) {
             for (var elective in course.electivesInGroup) {
                 var c = course.electivesInGroup[elective];
                 if (courseWasTaken(takenCourses, c)) {
@@ -206,22 +211,20 @@ function step3Init() {
             }
         }
         // if prereqs not met
-        if (!advanced["checkAllowHalfCoRequisites"]) {
-            loop2: for (var prereq in course.prereqs) {
-                var c = course.prereqs[prereq];
-                if (typeof c == "number") {
-                    if (!courseWasTaken(takenCourses, c)) {
-                        continue loop1;
-                    }
-                } else { // array, so OR them
-                    // if at least one is being taken, we're good
-                    for (var orPrereq in c) {
-                        if (courseWasTaken(takenCourses, c[orPrereq])) {
-                            continue loop2;
-                        }
-                    }
+        loop2: for (var prereq in course.prereqs) {
+            var c = course.prereqs[prereq];
+            if (typeof c == "number") {
+                if (!courseWasTaken(takenCourses, c)) {
                     continue loop1;
                 }
+            } else { // array, so OR them
+                // if at least one is being taken, we're good
+                for (var orPrereq in c) {
+                    if (courseWasTaken(takenCourses, c[orPrereq])) {
+                        continue loop2;
+                    }
+                }
+                continue loop1;
             }
         }
 

@@ -3,6 +3,7 @@ $(function() {
         classToColor = {};
     $("#generate").click(function() {
         console.log("Generating Schedules");
+        scheduleIndex = 0;
 
         // get all of the options from the page inputs
         var options = new Options();
@@ -60,16 +61,19 @@ $(function() {
                 data.id, data.number, data.name, data.credits,
                 data.prereqs, data.coreq, data.electivesInGroup,
                 "blue",
-                classList
+                classList,
+                data.description
             );
             courses.add(course);
         }
 
         // set advanced settings
         var adv = getAdvancedFromStorage();
-        options.setAllowHalfCoRequisites(adv["checkAllowHalfCoRequisites"]);
-        options.setAllowMultipleElectives(adv["checkMultipleElectives"]);
-        options.setHideFullClasses(adv["checkHideFullClasses"]);
+        if (adv) {
+            options.setAllowHalfCoRequisites(adv["checkAllowHalfCoRequisites"]);
+            options.setAllowMultipleElectives(adv["checkMultipleElectives"]);
+            options.setHideFullClasses(adv["checkHideFullClasses"]);
+        }
 
         // start the generation in a worker
         if (!window.Worker || true) {// if we can't run it in the background
@@ -227,10 +231,10 @@ $(function() {
 
     var scheduleIndex = 0;
     function nextSchedule() {
-        drawSchedule(schedules[++scheduleIndex % schedules.length]);
+        drawSchedule(schedules[++scheduleIndex]);
     }
     function prevSchedule() {
-        drawSchedule(schedules[--scheduleIndex % schedules.length]);
+        drawSchedule(schedules[--scheduleIndex]);
     }
     $(document.body).keydown(function(event) {
         // console.log("event.which = " + event.which);
@@ -252,8 +256,10 @@ $(function() {
                 var d = DAYS[times[i].day];
                 str += (d == "Thu") ? "R" : d.charAt(0);
             } else {
+                var d = DAYS[times[i].day];
                 str += " " + strFromTime(lastTime.start) + "-"
-                    + strFromTime(lastTime.end) + ", ";
+                    + strFromTime(lastTime.end) + ", "
+                    + ((d == "Thu") ? "R" : d.charAt(0));
             }
         }
         str += " " + strFromTime(lastTime.start) + "-"

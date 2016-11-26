@@ -79,7 +79,8 @@ function Course(
         id, number, name, credits,
         preReqs, coReqs, electivesInGroup,
         color,
-        classList) {
+        classList,
+        description) {
     // primary data about course
     this.id = id;
     this.number = number;
@@ -100,6 +101,8 @@ function Course(
             this._classList.at(i).course = this;
         }
     }
+
+    this.description = description;
 
     this.getClassList = function() {
         return this._classList;
