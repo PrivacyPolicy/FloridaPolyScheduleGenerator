@@ -7,6 +7,20 @@
     border: none;
     cursor: pointer;
 }
+/* Step 1 - Advanced Settings */
+#showAdvancedOption.hide > .hide {
+    display: none;
+}
+#showAdvancedOption.show > .show {
+    display: none;
+}
+#advancedSettings {
+    display: none;
+}
+#advancedSettings.show {
+    display: block;
+}
+
 /* Step 2 */
 /* Step 3 */
 .coursePref {

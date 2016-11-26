@@ -66,9 +66,24 @@
                     </div>
                     <br><br>
 
-                    <a href="#" id=showAdvancedOption>
-                        Show advanced settings</a>
-
+                    <a href="#" id=showAdvancedOption class=hide>
+                        <span class=show>
+                            Show advanced settings</span>
+                        <span class=hide>
+                            Hide advanced settings</span></a>
+                    <div id=advancedSettings>
+                        <br>
+                        <input type=checkbox id=checkAllowHalfCoRequisites
+                                class=negate checked>
+                            Require all co-requsite courses
+                        <br>
+                        <input type=checkbox id=checkMultipleElectives>
+                            Allow taking more than one elective from an elective
+                            group
+                        <br>
+                        <input type=checkbox id=checkHideFullClasses checked>
+                            Hide full classes
+                    </div>
                 </div>
 
                 <!-- Schedule (times) -->

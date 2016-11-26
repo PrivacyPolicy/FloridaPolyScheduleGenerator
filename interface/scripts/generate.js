@@ -65,6 +65,12 @@ $(function() {
             courses.add(course);
         }
 
+        // set advanced settings
+        var adv = getAdvancedFromStorage();
+        options.setAllowHalfCoRequisites(adv["checkAllowHalfCoRequisites"]);
+        options.setAllowMultipleElectives(adv["checkMultipleElectives"]);
+        options.setHideFullClasses(adv["checkHideFullClasses"]);
+
         // start the generation in a worker
         if (!window.Worker || true) {// if we can't run it in the background
             start();

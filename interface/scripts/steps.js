@@ -116,6 +116,57 @@ function getCoursesFromStorage() {
     }
 }
 
+// advanced settings
+$(function() {
+    loadAdvancedFromStorage();
+    $("#advancedSettings > input").change(function(event) {
+        saveAdvancedToStorage();
+    });
+
+    // controls to show/hide advanced settings
+    var $advLink = $("#showAdvancedOption");
+    $advLink.click(function(event) {
+        if ($advLink.hasClass("show")) {
+            $advLink.removeClass("show").addClass("hide");
+            $("#advancedSettings").removeClass("show");
+        } else {
+            $advLink.removeClass("hide").addClass("show");
+            $("#advancedSettings").addClass("show");
+            // scroll to bottom to show settings
+            $("#step1").scrollTop(700000);
+        }
+    });
+});
+function saveAdvancedToStorage() {
+    var $advanced = $("#advancedSettings");
+    var $checks = $advanced.find("input[type=checkbox]");
+    var object = {};
+    for (var i = 0; i < $checks.size(); i++) {
+        var $check = $checks.eq(i);
+        var value = $check[0].checked;
+        value = $check.hasClass("negate") ? !value : value;
+        object[$check.attr("id")] = value;
+    }
+    localStorage[ID + "_" + STEP + "_ADVANCED"] = JSON.stringify(object);
+}
+function getAdvancedFromStorage() {
+    try {
+        return JSON.parse(localStorage[ID + "_" + STEP + "_ADVANCED"]);
+    } catch (e) {
+        console.error(e);
+        return null;
+    }
+}
+function loadAdvancedFromStorage() {
+    var object = getAdvancedFromStorage();
+    if (!object) return {};
+    for (var id in object) {
+        var $check = $("#" + id);
+        var neg = $check.hasClass("negate");
+        $check[0].checked = (neg) ? !object[id] : object[id];
+    }
+}
+
 
 
 
@@ -135,6 +186,9 @@ function step3Init() {
     var takenCourses = data.courses;
     var courses = jsonCourseData[data.major][data.concentration];
     purgeCoursePrefs();
+    // get advanced settings
+    var advanced = getAdvancedFromStorage();
+
     loop1: for (var i = 0; i < courses.length; i++) {
         var course = courses[i];
 
@@ -143,7 +197,7 @@ function step3Init() {
             continue loop1;
         }
         // if elective already taken
-        if (!getAllowMultipleElectives()) {
+        if (!advanced["checkMultipleElectives"]) {
             for (var elective in course.electivesInGroup) {
                 var c = course.electivesInGroup[elective];
                 if (courseWasTaken(takenCourses, c)) {
@@ -152,20 +206,22 @@ function step3Init() {
             }
         }
         // if prereqs not met
-        loop2: for (var prereq in course.prereqs) {
-            var c = course.prereqs[prereq];
-            if (typeof c == "number") {
-                if (!courseWasTaken(takenCourses, c)) {
+        if (!advanced["checkAllowHalfCoRequisites"]) {
+            loop2: for (var prereq in course.prereqs) {
+                var c = course.prereqs[prereq];
+                if (typeof c == "number") {
+                    if (!courseWasTaken(takenCourses, c)) {
+                        continue loop1;
+                    }
+                } else { // array, so OR them
+                    // if at least one is being taken, we're good
+                    for (var orPrereq in c) {
+                        if (courseWasTaken(takenCourses, c[orPrereq])) {
+                            continue loop2;
+                        }
+                    }
                     continue loop1;
                 }
-            } else { // array, so OR them
-                // if at least one is being taken, we're good
-                for (var orPrereq in c) {
-                    if (courseWasTaken(takenCourses, c[orPrereq])) {
-                        continue loop2;
-                    }
-                }
-                continue loop1;
             }
         }
 
@@ -180,9 +236,6 @@ function step3Init() {
 }
 function courseWasTaken(takenCourses, id) {
     return !!takenCourses["course-" + id];
-}
-function getAllowMultipleElectives() {
-    return false;
 }
 function addCoursePref(data, coursePrefObj) {
     var courses = jsonCourseData[data.major][data.concentration];
