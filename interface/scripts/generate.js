@@ -31,6 +31,14 @@ $(function() {
         options.setCreditFavoredValue(
             parseInt($("#creditGoal").val()));
         options.setCreditMax(parseInt($("#creditMax").val()));
+
+        // set advanced settings
+        var adv = getAdvancedFromStorage();
+        if (adv) {
+            options.setAllowHalfCoRequisites(adv["checkAllowHalfCoRequisites"]);
+            options.setAllowMultipleElectives(adv["checkMultipleElectives"]);
+            options.setHideFullClasses(adv["checkHideFullClasses"]);
+        }
         // don't even bother showing classes with Dr. Ding
         options.setHideDing(false);
 
@@ -65,14 +73,6 @@ $(function() {
                 data.description
             );
             courses.add(course);
-        }
-
-        // set advanced settings
-        var adv = getAdvancedFromStorage();
-        if (adv) {
-            options.setAllowHalfCoRequisites(adv["checkAllowHalfCoRequisites"]);
-            options.setAllowMultipleElectives(adv["checkMultipleElectives"]);
-            options.setHideFullClasses(adv["checkHideFullClasses"]);
         }
 
         // start the generation in a worker

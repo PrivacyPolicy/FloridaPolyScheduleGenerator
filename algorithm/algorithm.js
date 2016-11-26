@@ -31,7 +31,11 @@ function ScheduleGenerator(
         this.calculationTime = Date.now();
         var buildSchedule = new Schedule();
         this.schedules = [];
-        this.preProcessClasses();
+        var preProcess = this.preProcessClasses();
+        if (!preProcess) {
+            this.calculationTime = (Date.now() - this.calculationTime) / 1000;
+            return [];
+        }
         // // (Dynamic Programming) used to remember previous
         // // calculations when two classes didn't work before
         // this.collisionMatrix = new SymmetricMatrix(
@@ -62,7 +66,13 @@ function ScheduleGenerator(
                 }
             }
             if (classes.getLength() == 0) {
+                var id = this.courses.at(c).id;
                 this.courses.removeAt(c);
+                if (this.options.coursesRequired.indexOf(id) > -1) {
+                    if (DEBUG) console.log(
+                        "A required course doesn't meet the criteria");
+                    return false;
+                }
             }
         }
         // sort with must-have courses first to find those
@@ -75,6 +85,7 @@ function ScheduleGenerator(
                 lastInd++;
             }
         }
+        return true;
     };
 
     // remove any residual classes that passed but are overall bad
