@@ -6,7 +6,7 @@
 // }
 function Schedule() {
     this.classes = new ClassList();
-    this.ranking = 0;
+    this.ranking = {};
     this.credits = 0;
 
     this.addClass = function(classObj) {
@@ -18,9 +18,123 @@ function Schedule() {
     };
 
     this.calculateRanking = function(options) {
-        // TODO: implement a formula to determine ranking
         // from 0-infinity, higher = worse
-        this.ranking = 0;
+        this.ranking = {};
+
+        // calculate credit influence
+        // no need to calculate credits, already correct
+        var min = options.creditRange.minValue;
+        var max = options.creditRange.maxValue;
+        var fav = options.creditRange.favoredValue;
+        var creditOffset = (this.credits > fav)
+            ? (this.credits - fav) / (max - fav)
+            : (fav - this.credits) / (fav - min);
+        this.ranking["credits"] = creditOffset;
+
+        // calculate time's influence
+        // build a "matrix" of times that are covered
+        var timeCoverage = [];
+        // how many 15-minute times are outside preferred times:
+        var offendingTimesCount = 0;
+        for (var i = 0; i < options.timesUnfavored.length; i++) {
+            var time = options.timesUnfavored[i];
+            var start = time.start.h * 100 + time.start.m;
+            var end = time.end.h * 100 + time.end.m;
+            if (!timeCoverage[time.day]) {
+                timeCoverage[time.day] = [];
+            }
+            while (start < end) {
+                timeCoverage[time.day][start] = true;
+                start += 15;
+                if (start % 100 == 60) start += 40;
+            }
+        }
+        // Test against time coverage matrix
+        var onDays = []; // save this for later
+        for (var cl = 0; cl < this.classes.getLength(); cl++) {
+            var theClass = this.classes.at(cl);
+            for (var i = 0; i < theClass.times.length; i++) {
+                var time = theClass.times[i];
+                if (onDays.indexOf(time.day) == -1) onDays.push(time.day);
+                var start = time.start.h * 100 + time.start.m;
+                var end = time.end.h * 100 + time.end.m;
+                if (!timeCoverage[time.day]) {
+                    timeCoverage[time.day] = [];
+                }
+                while (start < end) {
+                    if (timeCoverage[time.day][start]) {
+                        offendingTimesCount++;
+                    }
+                    start += 15;
+                    if (start % 100 == 60) start += 40;
+                }
+            }
+        }
+        this.ranking["times"] = offendingTimesCount;
+
+        // calculate professor's influence
+        var profRank = 0;
+        for (var cl = 0; cl < this.classes.getLength(); cl++) {
+            var theClass = this.classes.at(cl);
+            var profPref = options.professors[theClass.professor];
+            if (profPref != undefined) {
+                if (profPref == pref.favored) {
+                    profRank--;
+                } else if (profPref == pref.favored) {
+                    profRank++;
+                }
+            }
+        }
+        this.ranking["professors"] = profRank;
+
+        // calculate course's influence
+        var courseRank = 0;
+        for (var cl = 0; cl < this.classes.getLength(); cl++) {
+            var theClass = this.classes.at(cl);
+            var courseID = theClass.course.id;
+            if (options.coursesFavored.indexOf(courseID) != -1) {
+                courseRank--;
+            } else if (options.coursesUnfavored.indexOf(courseID) != -1) {
+                courseRank++;
+            }
+        }
+        this.ranking["courses"] = courseRank;
+
+        // calculate back-to-backedness's influence
+        var gapTimes = 0;
+        var timesByDay = [[], [], [], [], [], [], []];
+        for (var cl = 0; cl < this.classes.getLength(); cl++) {
+            var theClass = this.classes.at(cl);
+            for (var i = 0; i < theClass.times.length; i++) {
+                var time = theClass.times[i];
+                timesByDay[time.day].push(time);
+            }
+        }
+        for (var i = 0; i < timesByDay.length; i++) {
+            // order the times in each day by start time
+            timesByDay[i].sort(function(a, b) {
+                var _a = a.start.h * 100 + a.start.m;
+                var _b = b.start.h * 100 + b.start.m;
+                if (_a < _b) return -1;
+                if (_a > _b) return 1;
+                return 0;
+            });
+            // find how long the gaps are between classes
+            for (var j = 1; j < timesByDay[i].length; j++) {
+                var timeA = timesByDay[i][j - 1];
+                var timeB = timesByDay[i][j];
+                gapTimes += (timeB.start.h * 100 + timeB.start.m) -
+                        (timeA.end.h * 100 + timeA.end.m);
+            }
+        }
+        if (options.backToBack == pref.favored) {
+            this.ranking["backToBack"] = gapTimes;
+        }
+
+        // calculate day count's influence (note: NEGATIVE influence)
+        var dayCount = onDays.length - ((getShowWeekends()) ? 7 : 5);
+        this.ranking["totalDays"] = dayCount;
+
         return this.ranking;
     };
     this.calculateCredits = function() {
@@ -399,6 +513,7 @@ function Options() {
         new Time(3, 9, 0, 17, 0),
         new Time(4, 9, 0, 17, 0)
     ];
+    this.timesAll = this.timesNeutral.concat(this.timesUnfavored);
     this.professors = {};
 
     // functions
@@ -425,16 +540,20 @@ function Options() {
             this._defaultTimes = false;
             this.timesUnfavored = [];
             this.timesNeutral = [];
+            this.timesAll = [];
         }
         this.timesNeutral.push(time);
+        this.timesAll.push(time);
     };
     this.addUnfavoredTime = function(time) {
         if (this._defaultTimes) {
             this._defaultTimes = false;
             this.timesUnfavored = [];
             this.timesNeutral = [];
+            this.timesAll = [];
         }
         this.timesUnfavored.push(time);
+        this.timesAll.push(time);
     };
     this.setProfessorPreference = function(professor, preferrence) {
         this.professors[professor] = preferrence;
@@ -471,6 +590,9 @@ function Options() {
     this.setAllowHalfCoRequisites = function(allow) {
         this.allowHalfCoRequisites = allow;
     };
+
+    // TODO: prefer fewer or more credits than favored?
+    // TODO: show fewest-day schedules first?
 
     // functions:
 

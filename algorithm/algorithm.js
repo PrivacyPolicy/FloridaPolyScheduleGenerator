@@ -52,8 +52,6 @@ function ScheduleGenerator(
         this.calculationTime = (Date.now() - this.calculationTime) / 1000;
         return this.schedules;
     };
-    // favored times should be considered acceptable by the algorithm
-    options.timesNeutral = options.timesNeutral.concat(options.timesUnfavored);
 
     // remove any classes that would never work in the first place
     this.preProcessClasses = function() {
@@ -90,16 +88,46 @@ function ScheduleGenerator(
 
     // remove any residual classes that passed but are overall bad
     this.postProcessSchedules = function() {
+        var maxRank = {}, minRank = {};
         for (var i = 0; i < this.schedules.length; i++) {
             this.schedules[i].calculateCredits();
-            this.schedules[i].calculateRanking(this.options);
+            var ranking = this.schedules[i].calculateRanking(this.options);
+            for (var r in ranking) {
+                var oldMax = maxRank[r] || 0, oldMin = minRank[r] || 0;
+                maxRank[r] = Math.max(oldMax, ranking[r]);
+                minRank[r] = Math.min(oldMin, ranking[r]);
+            }
         }
         // sort by ranking value
+        const rankWeights = {
+            totalDays: 6,
+            credits: 5,
+            times: 4,
+            professors: 3,
+            courses: 2,
+            backToBack: 1
+        };
+        const eachInfluence = 1;
         this.schedules = this.schedules.sort(function(a, b) {
-            if (a.ranking > b.ranking) return -1;
-            if (a.ranking < b.ranking) return 1;
+            var rankingNumA = 0,
+                rankingNumB = 0,
+                range = 0,
+                aR = a.ranking,
+                bR = b.ranking;
+            for (var r in aR) {
+                range = maxRank[r] - minRank[r];
+                if (range == 0 || isNaN(range)) continue;
+                rankingNumA += rankWeights[r] * (aR[r] / range) * eachInfluence;
+                rankingNumB += rankWeights[r] * (bR[r] / range) * eachInfluence;
+            }
+            a.postRank = rankingNumA;
+            b.postRank = rankingNumB;
+            console.log(rankingNumA + " - " + rankingNumB);
+            if (rankingNumA < rankingNumB) return -1;
+            if (rankingNumA > rankingNumB) return 1;
             return 0;
         });
+
     };
 
     // the core of this API, the recursive-backtracking

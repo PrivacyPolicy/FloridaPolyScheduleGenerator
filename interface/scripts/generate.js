@@ -1,6 +1,5 @@
 $(function() {
-    var worker, workerRanking = false, schedules = [],
-        classToColor = {};
+    var worker, workerRanking = false, schedules = [];
     $("#generate").click(function() {
         console.log("Generating Schedules");
         scheduleIndex = 0;
@@ -48,6 +47,7 @@ $(function() {
         var dataCourses = getCoursesFromStorage();
         var rawCourses = jsonCourseData
             [dataCourses.major][dataCourses.concentration];
+        var colorIndex = 0;
         for (var i in dataCoursePrefs) {
             var id = parseInt(i.split("-")[1]);
             var data = getCourseWithID(rawCourses, id);
@@ -68,7 +68,7 @@ $(function() {
             var course = new Course(
                 data.id, data.number, data.name, data.credits,
                 data.prereqs, data.coreq, data.electivesInGroup,
-                "blue",
+                COLORS[colorIndex++],
                 classList,
                 data.description
             );
@@ -88,16 +88,6 @@ $(function() {
                 generator.getCalculationTime() + " seconds";
             console.log(message);
             alert(message);
-            // show the progress dialog
-            // calculate ranking, sort by ranking (lowest==better)
-            for (var i = 0; i < schedules.length; i++) {
-                schedules[i].calculateRanking();
-            }
-            schedules.sort(function(a, b) {
-                var _a = a.ranking, _b = b.ranking;
-                if (_a === _b) return 0;
-                return (_a < _b) ? -1 : 1;
-            });
             finish();
         } else {
             // worker = new Worker("scripts/worker.js");
@@ -132,6 +122,7 @@ $(function() {
         function start() {
             $("#generate").addClass("hidden");
             $("#generateStatus").removeClass("hidden");
+            $("#scheduleData").addClass("hidden");
         }
         // whenever a point of progress (e.g. new schedule calculated) occurs
         function middle(progress) {
@@ -142,6 +133,7 @@ $(function() {
             console.log("The cream-of-the-crop is %o.", schedules[0]);
             $("#scheduleOutput").removeClass("hidden");
             $("#generateStatus").addClass("hidden");
+            $("#scheduleData").removeClass("hidden");
             drawSchedule(schedules[0]);
         }
     });
@@ -167,15 +159,17 @@ $(function() {
         for (var i = 0; i < schedule.classes.getLength(); i++) {
             drawClass(schedule.classes.at(i));
         }
+        // show some additional data about the schedule
+        $("#scheduleData").text(
+            (scheduleIndex%schedules.length + 1) + "/" + schedules.length
+            + ", Credits: " + schedule.credits
+            + ", Ranking: " + schedule.postRank + "<br>"
+            + JSON.stringify(schedule.ranking)
+        );
     }
-    var classColorIndex = 0;
     function drawClass(theClass) {
-        if (!classToColor[theClass.course.id]) {
-            classToColor[theClass.course.id] = COLORS[classColorIndex++];
-        }
-        var color = classToColor[theClass.course.id];
         for (var i = 0; i < theClass.times.length; i++) {
-            drawClassTimeSlot(theClass.times[i], color,
+            drawClassTimeSlot(theClass.times[i], theClass.course.color,
                 theClass, timesToStr(theClass.times));
         }
     }
@@ -217,9 +211,11 @@ $(function() {
         });
         var course = theClass.course;
         $slot.html(course.number + theClass.section + "&nbsp;" + course.name + "<br>"
-            + timeStr + "<br>Credits: " + course.credits);
+            + timeStr + "<br>Credits: " + course.credits + "<br>"
+            + theClass.professor);
         $slot.attr("title", course.number + " " + course.name + "\n"
-            + timeStr + "\nCredits: " + course.credits + "\n\n"
+            + timeStr + "\nCredits: " + course.credits + "\n"
+            + theClass.professor + "\n\n"
             + course.description);
 
         $("#scheduleOutput > .scheduleForeground").append($slot);
@@ -231,10 +227,12 @@ $(function() {
 
     var scheduleIndex = 0;
     function nextSchedule() {
-        drawSchedule(schedules[++scheduleIndex]);
+        scheduleIndex = Math.min(++scheduleIndex, schedules.length - 1);
+        drawSchedule(schedules[scheduleIndex]);
     }
     function prevSchedule() {
-        drawSchedule(schedules[--scheduleIndex]);
+        scheduleIndex = Math.max(0, --scheduleIndex);
+        drawSchedule(schedules[scheduleIndex]);
     }
     $(document.body).keydown(function(event) {
         // console.log("event.which = " + event.which);

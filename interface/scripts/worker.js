@@ -63,7 +63,7 @@ onmessage = function(event) {
     // calculate ranking, sort by ranking (lowest==better)
     status = "ranking";
     for (var i = 0; i < schedules.length; i++) {
-        schedules[i].calculateRanking();
+        schedules[i].calculateRanking(options);
         progressCallback(i);
     }
     schedules.sort(function(a, b) {

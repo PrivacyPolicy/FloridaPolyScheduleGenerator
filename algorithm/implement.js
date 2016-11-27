@@ -8,8 +8,8 @@ var preProcessFilter = function(options, theClass) {
     // is during an unacceptable time
     // build a "matrix" of times that are covered,
     var timeCoverage = [];
-    for (var i = 0; i < options.timesNeutral.length; i++) {
-        var time = options.timesNeutral[i];
+    for (var i = 0; i < options.timesAll.length; i++) {
+        var time = options.timesAll[i];
         var start = time.start.h * 100 + time.start.m;
         var end = time.end.h * 100 + time.end.m;
         if (!timeCoverage[time.day]) {

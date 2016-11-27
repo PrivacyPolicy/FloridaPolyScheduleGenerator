@@ -99,3 +99,10 @@ canvas#timeInput {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+#scheduleData {
+    background: white;
+    padding: 1em;
+    border-radius: 5px;
+    margin-top: 1em;
+}

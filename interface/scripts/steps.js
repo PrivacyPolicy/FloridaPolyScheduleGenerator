@@ -317,4 +317,5 @@ function step5Init() {
     $("#generate").removeClass("hidden");
     $("#scheduleOutput").addClass("hidden");
     $("#generateStatus").addClass("hidden");
+    $("#scheduleData").addClass("hidden");
 }
