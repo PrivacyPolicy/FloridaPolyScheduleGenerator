@@ -151,6 +151,17 @@ function Schedule() {
         copySchedule.classes = this.classes.copy();
         return copySchedule;
     };
+
+    this.toString = function() {
+        var str = "Schedule[";
+        for (var i = 0; i < this.classes.getLength(); i++) {
+            var theClass = this.classes.at(i);
+            str += theClass.id
+                    + ((theClass.course.name.indexOf("Lab") != -1) ? "L" : "")
+                    + ", ";
+        }
+        return str.substr(0, str.length - 2) + "]";
+    };
 }
 
 // class:

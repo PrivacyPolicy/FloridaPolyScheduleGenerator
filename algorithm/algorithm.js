@@ -89,9 +89,19 @@ function ScheduleGenerator(
     // remove any residual classes that passed but are overall bad
     this.postProcessSchedules = function() {
         var maxRank = {}, minRank = {};
-        for (var i = 0; i < this.schedules.length; i++) {
-            this.schedules[i].calculateCredits();
-            var ranking = this.schedules[i].calculateRanking(this.options);
+        var scheduleStrs = [];
+        for (var i = this.schedules.length - 1; i >= 0; i--) {
+            var schedule = this.schedules[i];
+            // remove duplicates, if they exist
+            var str = schedule.toString();
+            if (scheduleStrs.indexOf(str) == -1) {
+                scheduleStrs.push(str);
+            } else { // schedule already exists
+                this.schedules.splice(i, 1);
+                continue;
+            }
+            schedule.calculateCredits();
+            var ranking = schedule.calculateRanking(this.options);
             for (var r in ranking) {
                 var oldMax = maxRank[r] || 0, oldMin = minRank[r] || 0;
                 maxRank[r] = Math.max(oldMax, ranking[r]);
