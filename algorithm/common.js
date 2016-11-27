@@ -2,6 +2,7 @@ const DEBUG = true;
 
 // days:
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAY_CHARS = ["Su", "M", "T", "W", "R", "F", "Sa"];
 
 // pref (of preferrence setting):
 var pref = {

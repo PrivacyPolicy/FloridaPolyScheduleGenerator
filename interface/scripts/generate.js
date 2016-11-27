@@ -243,28 +243,25 @@ $(function() {
         }
     });
     function timesToStr(times) {
-        console.log(times);
-        // var str = DAYS[times[0].day].charAt(0);
-        // var lastTime = times[0];
-        // for (var i = 1; i < times.length; i++) {
-        //     lastTime = times[i - 1];
-        //     var curTime = times[i];
-        //     if (lastTime.start.h == curTime.start.h
-        //             && lastTime.start.m == curTime.start.m
-        //             && lastTime.end.h == curTime.end.h
-        //             && lastTime.end.m == curTime.end.m) {
-        //         var d = DAYS[times[i].day];
-        //         str += (d == "Thu") ? "R" : d.charAt(0);
-        //     } else {
-        //         var d = DAYS[times[i].day];
-        //         str += " " + strFromTime(curTime.start) + "-"
-        //             + strFromTime(curTime.end) + ", "
-        //             + ((d == "Thu") ? "R" : d.charAt(0));
-        //     }
-        // }
-        // str += " " + strFromTime(lastTime.start) + "-"
-        //     + strFromTime(lastTime.end) + ", ";
-        // return str.substr(0, str.length - 2);
+        var str = DAY_CHARS[times[0].day] + " "
+            + strFromTime(times[0].start) + "-"
+            + strFromTime(times[0].end);
+        if (times.length == 1) return str;
+        // else:
+        var lastTime = times[0];
+        for (var i = 1; i < times.length; i++) {
+            if (lastTime.start == times[i].start &&
+                    lastTime.end == times[i].end) {
+                str = str.split(" ")[0]
+                    + DAY_CHARS[times[i].day] + " "
+                    + str.split(" ")[1];
+            } else {
+                str += ", " + DAY_CHARS[times[i].day] + " "
+                    + strFromTime(times[i].start) + "-"
+                    + strFromTime(times[i].end);
+            }
+        }
+        return str;
     }
 
     const DAY_TO_INT = {"M": 1, "T": 2, "W": 3, "R": 4, "F": 5};
