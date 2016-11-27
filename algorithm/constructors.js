@@ -7,6 +7,7 @@
 function Schedule() {
     this.classes = new ClassList();
     this.ranking = {};
+    this.normalizedRanking = {};
     this.credits = 0;
 
     this.addClass = function(classObj) {

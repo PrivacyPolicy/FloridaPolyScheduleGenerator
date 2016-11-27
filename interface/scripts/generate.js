@@ -130,7 +130,6 @@ $(function() {
         }
         // when finished, show first, highest-ranked schedule
         function finish() {
-            console.log("The cream-of-the-crop is %o.", schedules[0]);
             $("#scheduleOutput").removeClass("hidden");
             $("#generateStatus").addClass("hidden");
             $("#scheduleData").removeClass("hidden");
@@ -163,7 +162,7 @@ $(function() {
         $("#scheduleData").text(
             (scheduleIndex%schedules.length + 1) + "/" + schedules.length
             + ", Credits: " + schedule.credits
-            + ", Ranking: " + schedule.postRank + "<br>"
+            + ", Ranking: " + schedule.normalizedRanking + "<br>"
             + JSON.stringify(schedule.ranking)
         );
     }
@@ -244,8 +243,9 @@ $(function() {
     });
     function timesToStr(times) {
         var str = DAYS[times[0].day].charAt(0);
+        var lastTime = times[0];
         for (var i = 1; i < times.length; i++) {
-            var lastTime = times[i - 1];
+            lastTime = times[i - 1];
             var curTime = times[i];
             if (lastTime.start.h == curTime.start.h
                     && lastTime.start.m == curTime.start.m

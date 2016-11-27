@@ -94,7 +94,7 @@ canvas#timeInput {
 /* Step Final */
 .classTime {
     position: absolute;
-    font-size: 15px;
+    font-size: 13px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

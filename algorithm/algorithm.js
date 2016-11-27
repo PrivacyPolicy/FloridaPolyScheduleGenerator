@@ -107,24 +107,23 @@ function ScheduleGenerator(
             courses: 2,
             backToBack: 1
         };
-        const eachInfluence = 1;
-        this.schedules = this.schedules.sort(function(a, b) {
-            var rankingNumA = 0,
-                rankingNumB = 0,
-                range = 0,
-                aR = a.ranking,
-                bR = b.ranking;
-            for (var r in aR) {
+        // re-calculate
+        for (var i = 0; i < this.schedules.length; i++) {
+            var oldRanking = this.schedules[i].ranking;
+            var newRanking = 0;
+            var range = 0;
+            for (var r in oldRanking) {
                 range = maxRank[r] - minRank[r];
                 if (range == 0 || isNaN(range)) continue;
-                rankingNumA += rankWeights[r] * (aR[r] / range) * eachInfluence;
-                rankingNumB += rankWeights[r] * (bR[r] / range) * eachInfluence;
+                newRanking += rankWeights[r] * (oldRanking[r] / range);
             }
-            a.postRank = rankingNumA;
-            b.postRank = rankingNumB;
-            console.log(rankingNumA + " - " + rankingNumB);
-            if (rankingNumA < rankingNumB) return -1;
-            if (rankingNumA > rankingNumB) return 1;
+            this.schedules[i].normalizedRanking = newRanking;
+        }
+        this.schedules = this.schedules.sort(function(a, b) {
+            var aR = a.normalizedRanking,
+                bR = b.normalizedRanking;
+            if (aR < bR) return -1;
+            if (aR > bR) return 1;
             return 0;
         });
 
@@ -239,7 +238,7 @@ function ScheduleGenerator(
             return collType.unknown;
         }
         for (var i = 0; i < aTimes.length; i++) {
-            for (var j = i; j < bTimes.length; j++) {
+            for (var j = Math.max(0, i - 1); j < bTimes.length; j++) {
                 var aStart = aTimes[i].start.h * 100 + aTimes[i].start.m;
                 var aEnd = aTimes[i].end.h * 100 + aTimes[i].end.m;
                 var bStart = bTimes[j].start.h * 100 + bTimes[j].start.m;

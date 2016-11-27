@@ -93,9 +93,11 @@ var processFilter = function(options, schedule) {
         for (var i = 0; i < schedule.classes.getLength(); i++) {
             var electiveGroup = schedule.classes.at(i).course.electivesInGroup;
             for (var j = 0; j < electiveGroup.length; j++) {
-                if (schedule.classes.exists(electiveGroup[j])) {
-                    report("Schedule", "it has elective conflicts");
-                    return false;
+                for (var k = 0; k < schedule.classes.getLength(); k++) {
+                    if (schedule.classes.at(k).course.id == electiveGroup[j]) {
+                        report("Schedule", "it has elective conflicts");
+                        return false;
+                    }
                 }
             }
         }
@@ -135,8 +137,11 @@ var postProcessFilter = function(options, schedule) {
             var coreqs = classes.at(i).course.coReqs;
             if (coreqs.length == 0) continue;
             for (var j = 0; j < coreqs.length; j++) {
-                if (classes.exists(coreqs[j])) {
-                    coreqsMetCount++;
+                for (var k = 0; k < classes.getLength(); k++) {
+                    if (classes.at(k).course.id == coreqs[j]) {
+                        coreqsMetCount++;
+                        break;
+                    }
                 }
             }
             if (coreqsMetCount < coreqs.length) {
