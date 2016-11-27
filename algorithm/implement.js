@@ -155,6 +155,128 @@ var postProcessFilter = function(options, schedule) {
 
 
 
+var rankingFilter = function(options, schedule) {
+    // from 0-infinity, higher = worse
+    ranking = {};
+
+    // calculate credit influence
+    // no need to calculate credits, already correct
+    var min = options.creditRange.minValue;
+    var max = options.creditRange.maxValue;
+    var fav = options.creditRange.favoredValue;
+    var creditOffset = (schedule.credits > fav)
+        ? (schedule.credits - fav) / (max - fav)
+        : (fav - schedule.credits) / (fav - min);
+    ranking["credits"] = creditOffset;
+
+    // calculate time's influence
+    // build a "matrix" of times that are covered
+    var timeCoverage = [];
+    // how many 15-minute times are outside preferred times:
+    var offendingTimesCount = 0;
+    for (var i = 0; i < options.timesUnfavored.length; i++) {
+        var time = options.timesUnfavored[i];
+        var start = time.start.h * 100 + time.start.m;
+        var end = time.end.h * 100 + time.end.m;
+        if (!timeCoverage[time.day]) {
+            timeCoverage[time.day] = [];
+        }
+        while (start < end) {
+            timeCoverage[time.day][start] = true;
+            start += 15;
+            if (start % 100 == 60) start += 40;
+        }
+    }
+    // Test against time coverage matrix
+    var onDays = []; // save this for later
+    for (var cl = 0; cl < schedule.classes.getLength(); cl++) {
+        var theClass = schedule.classes.at(cl);
+        for (var i = 0; i < theClass.times.length; i++) {
+            var time = theClass.times[i];
+            if (onDays.indexOf(time.day) == -1) onDays.push(time.day);
+            var start = time.start.h * 100 + time.start.m;
+            var end = time.end.h * 100 + time.end.m;
+            if (!timeCoverage[time.day]) {
+                timeCoverage[time.day] = [];
+            }
+            while (start < end) {
+                if (timeCoverage[time.day][start]) {
+                    offendingTimesCount++;
+                }
+                start += 15;
+                if (start % 100 == 60) start += 40;
+            }
+        }
+    }
+    ranking["times"] = offendingTimesCount;
+
+    // calculate professor's influence
+    var profRank = 0;
+    for (var cl = 0; cl < schedule.classes.getLength(); cl++) {
+        var theClass = schedule.classes.at(cl);
+        var profPref = options.professors[theClass.professor];
+        if (profPref != undefined) {
+            if (profPref == pref.favored) {
+                profRank--;
+            } else if (profPref == pref.favored) {
+                profRank++;
+            }
+        }
+    }
+    ranking["professors"] = profRank;
+
+    // calculate course's influence
+    var courseRank = 0;
+    for (var cl = 0; cl < schedule.classes.getLength(); cl++) {
+        var theClass = schedule.classes.at(cl);
+        var courseID = theClass.course.id;
+        if (options.coursesFavored.indexOf(courseID) != -1) {
+            courseRank--;
+        } else if (options.coursesUnfavored.indexOf(courseID) != -1) {
+            courseRank++;
+        }
+    }
+    ranking["courses"] = courseRank;
+
+    // calculate back-to-backedness's influence
+    var gapTimes = 0;
+    var timesByDay = [[], [], [], [], [], [], []];
+    for (var cl = 0; cl < schedule.classes.getLength(); cl++) {
+        var theClass = schedule.classes.at(cl);
+        for (var i = 0; i < theClass.times.length; i++) {
+            var time = theClass.times[i];
+            timesByDay[time.day].push(time);
+        }
+    }
+    for (var i = 0; i < timesByDay.length; i++) {
+        // order the times in each day by start time
+        timesByDay[i].sort(function(a, b) {
+            var _a = a.start.h * 100 + a.start.m;
+            var _b = b.start.h * 100 + b.start.m;
+            if (_a < _b) return -1;
+            if (_a > _b) return 1;
+            return 0;
+        });
+        // find how long the gaps are between classes
+        for (var j = 1; j < timesByDay[i].length; j++) {
+            var timeA = timesByDay[i][j - 1];
+            var timeB = timesByDay[i][j];
+            gapTimes += (timeB.start.h * 100 + timeB.start.m) -
+                    (timeA.end.h * 100 + timeA.end.m);
+        }
+    }
+    if (options.backToBack == pref.favored) {
+        ranking["backToBack"] = gapTimes;
+    }
+
+    // calculate day count's influence (note: NEGATIVE influence)
+    var dayCount = onDays.length - ((getShowWeekends()) ? 7 : 5);
+    ranking["totalDays"] = dayCount;
+
+    return ranking;
+}
+
+
 function report(type, message) {
     if (DEBUG) console.log(type + " removed because " + message);
 }

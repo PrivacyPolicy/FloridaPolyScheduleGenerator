@@ -1,6 +1,7 @@
 function ScheduleGenerator(
         courses, options,
-        preProcessFilter, processFilter, postProcessFilter) {
+        preProcessFilter, processFilter, postProcessFilter,
+        rankingFilter) {
     this.all_courses = courses;
     this.courses = null;
     this.options = options;
@@ -8,6 +9,7 @@ function ScheduleGenerator(
     this.preProcessFilter = preProcessFilter;
     this.processFilter = processFilter;
     this.postProcessFilter = postProcessFilter;
+    this.rankingFilter = rankingFilter;
 
     this.schedules = [];
     this.calculationTime = 0;
@@ -101,7 +103,8 @@ function ScheduleGenerator(
                 continue;
             }
             schedule.calculateCredits();
-            var ranking = schedule.calculateRanking(this.options);
+            var ranking = schedule.calculateRanking(
+                this.options, rankingFilter);
             for (var r in ranking) {
                 var oldMax = maxRank[r] || 0, oldMin = minRank[r] || 0;
                 maxRank[r] = Math.max(oldMax, ranking[r]);

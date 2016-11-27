@@ -81,7 +81,8 @@ $(function() {
             // hide the cancel button because it can't be cancelled
             $("#generateCancel").addClass("hidden");
             var generator = new ScheduleGenerator(courses, options,
-                preProcessFilter, processFilter, postProcessFilter);
+                preProcessFilter, processFilter, postProcessFilter,
+                rankingFilter);
             console.log("Calculating...");
             schedules = generator.generateSchedules(middle);
             var message = "Found " + schedules.length + " schedules in " +
