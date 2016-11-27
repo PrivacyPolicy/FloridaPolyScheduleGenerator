@@ -50,8 +50,12 @@ $(function() {
     }
     $(document.body).keydown(keyHandler);
     var $fore = $("#scheduleInput .scheduleForeground");
-    $fore.click(function(event) {
-        if ($(event.originalEvent.target).is($fore)) {
+    var downOnFore = false;
+    $(document.body).mousedown(function(event) {
+        downOnFore = ($(event.originalEvent.target).is($fore));
+    });
+    $fore.mouseup(function(event) {
+        if (downOnFore) {
             // get nearest 15 minutes to click location
             var step = HOUR_HEIGHT / 4;
             var newY = Math.round(event.offsetY / step) * step;
@@ -65,6 +69,7 @@ $(function() {
                 width: width + "%"
             });
         }
+        downOnFore = false;
     });
     $("#whichColor").click(function(event) {
         var $elem = $(event.originalEvent.target);
