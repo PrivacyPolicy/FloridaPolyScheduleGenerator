@@ -19,7 +19,8 @@ function Schedule() {
     };
 
     this.calculateRanking = function(options, rankingFilter) {
-        return rankingFilter(options, this);
+        this.ranking = rankingFilter(options, this);
+        return this.ranking;
     };
     this.calculateCredits = function() {
         this.credits = 0;

@@ -243,27 +243,28 @@ $(function() {
         }
     });
     function timesToStr(times) {
-        var str = DAYS[times[0].day].charAt(0);
-        var lastTime = times[0];
-        for (var i = 1; i < times.length; i++) {
-            lastTime = times[i - 1];
-            var curTime = times[i];
-            if (lastTime.start.h == curTime.start.h
-                    && lastTime.start.m == curTime.start.m
-                    && lastTime.end.h == curTime.end.h
-                    && lastTime.end.m == curTime.end.m) {
-                var d = DAYS[times[i].day];
-                str += (d == "Thu") ? "R" : d.charAt(0);
-            } else {
-                var d = DAYS[times[i].day];
-                str += " " + strFromTime(lastTime.start) + "-"
-                    + strFromTime(lastTime.end) + ", "
-                    + ((d == "Thu") ? "R" : d.charAt(0));
-            }
-        }
-        str += " " + strFromTime(lastTime.start) + "-"
-            + strFromTime(lastTime.end) + ", ";
-        return str.substr(0, str.length - 2);
+        console.log(times);
+        // var str = DAYS[times[0].day].charAt(0);
+        // var lastTime = times[0];
+        // for (var i = 1; i < times.length; i++) {
+        //     lastTime = times[i - 1];
+        //     var curTime = times[i];
+        //     if (lastTime.start.h == curTime.start.h
+        //             && lastTime.start.m == curTime.start.m
+        //             && lastTime.end.h == curTime.end.h
+        //             && lastTime.end.m == curTime.end.m) {
+        //         var d = DAYS[times[i].day];
+        //         str += (d == "Thu") ? "R" : d.charAt(0);
+        //     } else {
+        //         var d = DAYS[times[i].day];
+        //         str += " " + strFromTime(curTime.start) + "-"
+        //             + strFromTime(curTime.end) + ", "
+        //             + ((d == "Thu") ? "R" : d.charAt(0));
+        //     }
+        // }
+        // str += " " + strFromTime(lastTime.start) + "-"
+        //     + strFromTime(lastTime.end) + ", ";
+        // return str.substr(0, str.length - 2);
     }
 
     const DAY_TO_INT = {"M": 1, "T": 2, "W": 3, "R": 4, "F": 5};
