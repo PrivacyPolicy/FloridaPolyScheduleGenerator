@@ -60,7 +60,6 @@ onmessage = function(event) {
     var dataCourses = data["getCoursesFromStorage"];
     var rawCourses = data["jsonCourseData"]
         [dataCourses.major][dataCourses.concentration];
-    var colorIndex = 0;
     for (var i in dataCoursePrefs) {
         var id = parseInt(i.split("-")[1]);
         var cData = getCourseWithID(rawCourses, id);
@@ -81,7 +80,7 @@ onmessage = function(event) {
         var course = new Course(
             cData.id, cData.number, cData.name, cData.credits,
             cData.prereqs, cData.coreq, cData.electivesInGroup,
-            COLORS[colorIndex++],
+            null,
             classList,
             cData.description
         );
@@ -117,14 +116,21 @@ function middle(progress) {
 }
 // when finished, show first, highest-ranked schedule
 function finish(message) {
-    var scheduleStrs = [];
+    // var scheduleStrs = [];
     for (var i = 0; i < schedules.length; i++) {
-        scheduleStrs.push(schedules[i].toString());
+        // scheduleStrs.push(schedules[i].toString());
+        var classes = schedules[i].classes;
+        for (var j = 0; j < classes.getLength(); j++) {
+            var oldCourse = classes.at(j).course;
+            if (typeof oldCourse == "object") {
+                classes.at(j).course = oldCourse.id;
+            } // otherwise, it's already been replaced
+        }
     }
     postMessage(JSON.stringify({
         type: "finish",
         message: message,
-        schedules: scheduleStrs
+        schedules: schedules
     }));
 }
 

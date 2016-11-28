@@ -40,8 +40,6 @@ $(function() {
         } else {
             alert("Your browser does not support JSWorkers");
         }
-
-        // before the beginning of generation
     });
     function start() {
         $("#generate").addClass("hidden");
@@ -68,24 +66,15 @@ $(function() {
         }
     });
 
-    function getCourseWithID(courses, courseID) {
-        for (var i = 0; i < courses.length; i++) {
-            if (courses[i].id == courseID) {
-                return courses[i];
-            }
-        }
-        return null;
-    }
-
     function drawSchedule(schedule) {
-        schedule = scheduleFromStr(schedule);
+        schedule = scheduleFromObj(schedule);
         purgeSchedule();
         for (var i = 0; i < schedule.classes.getLength(); i++) {
             drawClass(schedule.classes.at(i));
         }
         // show some additional data about the schedule
         $("#scheduleData").text(
-            (scheduleIndex%schedules.length + 1) + "/" + schedules.length
+            (scheduleIndex % schedules.length + 1) + "/" + schedules.length
             + ", Credits: " + schedule.credits
             + ", Ranking: " + schedule.normalizedRanking + "<br>"
             + JSON.stringify(schedule.ranking)
@@ -188,24 +177,40 @@ $(function() {
         return str;
     }
 
-    function scheduleFromStr(scheduleStr) {
+    function scheduleFromObj(scheduleObj) {
+        // convert back to custom objects
+        var d = getCoursesFromStorage();
+        var rawCourses = jsonCourseData[d.major][d.concentration];
         var newSchedule = new Schedule();
-        // set classes
-        var classesStr = scheduleStr.split("[")[1].split("]")[0];
-        var classIDs = classesStr.split(", ");
-        for (var i = 0; i < classIDs.length; i++) {
-            var theClass = classFromStr(classIDs[i]);
-            newSchedule.addClass(theClass);
+        var rawClasses = scheduleObj.classes._classes;
+        for (var i = 0; i < rawClasses.length; i++) {
+            var c = rawClasses[i];
+            var theCourse = getCourseWithID(rawCourses, c.course);
+            // set color
+            if (!colorForCourse[theCourse.id]) {
+                colorForCourse[theCourse.id] = COLORS[colorIndex++];
+            }
+            theCourse.color = colorForCourse[theCourse.id];
+            // condense all of the newly made variables into a class object
+            var newClass = new Class(
+                c.id, theCourse, c.times, c.professor, c.section,
+                c.campus, c.building, c.room, c.seatsMax, c.seatsLeft
+            );
+            newSchedule.addClass(newClass);
         }
-        // set credits
-        var creditsStr = scheduleStr.split("credits=")[1].split(",")[0];
-        newSchedule.credits = parseInt(creditsStr);
-        // set normalizedRanking
-        var rankingStr = scheduleStr.split("normalizedRanking=")[1]
-            .split(",")[0];
-        newSchedule.normalizedRanking = parseFloat(rankingStr);
-
+        newSchedule.credits = scheduleObj.credits;
+        newSchedule.ranking = scheduleObj.ranking;
+        newSchedule.normalizedRanking = scheduleObj.normalizedRanking;
         return newSchedule;
+    }
+
+    function getCourseWithID(courses, courseID) {
+        for (var i = 0; i < courses.length; i++) {
+            if (courses[i].id == courseID) {
+                return courses[i];
+            }
+        }
+        return null;
     }
 
     function classFromStr(classStr) {
