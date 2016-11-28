@@ -48,7 +48,7 @@ function ScheduleGenerator(
             this.recGenerateSchedules(buildSchedule, 0, progressCallback);
         } else {
             this.recGenerateSchedules(buildSchedule, 0, progressCallback);
-            this.recGenerateSchedules(buildSchedule, 1, progressCallback);
+            //this.recGenerateSchedules(buildSchedule, 1, progressCallback);
         }
         this.postProcessSchedules();
         this.calculationTime = (Date.now() - this.calculationTime) / 1000;
@@ -91,17 +91,17 @@ function ScheduleGenerator(
     // remove any residual classes that passed but are overall bad
     this.postProcessSchedules = function() {
         var maxRank = {}, minRank = {};
-        var scheduleStrs = [];
+        // var scheduleStrs = [];
         for (var i = this.schedules.length - 1; i >= 0; i--) {
             var schedule = this.schedules[i];
             // remove duplicates, if they exist
-            var str = schedule.toString();
-            if (scheduleStrs.indexOf(str) == -1) {
-                scheduleStrs.push(str);
-            } else { // schedule already exists
-                this.schedules.splice(i, 1);
-                continue;
-            }
+            // var str = schedule.toString();
+            // if (scheduleStrs.indexOf(str) == -1) {
+            //     scheduleStrs.push(str);
+            // } else { // schedule already exists
+            //     this.schedules.splice(i, 1);
+            //     continue;
+            // }
             schedule.calculateCredits();
             var ranking = schedule.calculateRanking(
                 this.options, rankingFilter);

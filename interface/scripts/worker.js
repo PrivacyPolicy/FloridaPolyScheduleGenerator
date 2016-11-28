@@ -1,4 +1,5 @@
 importScripts("../../algorithm/algorithm.js",
+              "../../algorithm/common.js",
               "../../algorithm/constructors.js",
               "../../algorithm/implement.js");
 

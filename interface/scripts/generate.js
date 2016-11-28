@@ -1,147 +1,70 @@
 $(function() {
-    var worker, workerRanking = false, schedules = [];
+    var worker, workerRanking = false, schedules = [],
+        colorForCourse = {}, colorIndex = 0;
     $("#generate").click(function() {
-        console.log("Generating Schedules");
         scheduleIndex = 0;
+        colorForCourse = {};
+        colorIndex = 0;
 
-        // get all of the options from the page inputs
-        var options = new Options();
-        // load time preferences from step 2
-        var dataTimes = getTimesFromStorage();
-        for (var i in dataTimes) {
-            var time = dataTimes[i].time;
-            var timeObj = new Time(time.day, time.start.h,
-                time.start.m, time.end.h, time.end.m);
-            if (dataTimes[i].pref == pref.unfavored) {
-                options.addUnfavoredTime(timeObj);
-            } else if (dataTimes[i].pref == pref.neutral) {
-                options.addNeutralTime(timeObj);
-            }
-        }
-        // load course preferences from step 3
-        var dataCoursePrefs = getCoursePrefsFromStorage();
-        for (var i in dataCoursePrefs) {
-            var id = parseInt(i.split("-")[1]);
-            var thePref = dataCoursePrefs[i];
-            options.setCoursePreference(id, thePref);
-        }
-        // load credit range prefs from step ?
-        options.setCreditMin(parseInt($("#creditMin").val()));
-        options.setCreditFavoredValue(
-            parseInt($("#creditGoal").val()));
-        options.setCreditMax(parseInt($("#creditMax").val()));
-
-        // set advanced settings
-        var adv = getAdvancedFromStorage();
-        if (adv) {
-            options.setAllowHalfCoRequisites(adv["checkAllowHalfCoRequisites"]);
-            options.setAllowMultipleElectives(adv["checkMultipleElectives"]);
-            options.setHideFullClasses(adv["checkHideFullClasses"]);
-        }
-        // don't even bother showing classes with Dr. Ding
-        options.setHideDing(false);
-
-        // build list of courses from available courses
-        // (which has already been calculated by step 3...)
-        var courses = new CourseList();
-        var dataCourses = getCoursesFromStorage();
-        var rawCourses = jsonCourseData
-            [dataCourses.major][dataCourses.concentration];
-        var colorIndex = 0;
-        for (var i in dataCoursePrefs) {
-            var id = parseInt(i.split("-")[1]);
-            var data = getCourseWithID(rawCourses, id);
-            // get the data from the scraper
-            var classList = new ClassList();
-            for (var theClass in jsonClassData) {
-                if (theClass.indexOf(data.number) == 0) {
-                    var sections = jsonClassData[theClass];
-                    for (var section in sections) {
-                        var classObj = sectionToClass(
-                            data.number, sections[section]);
-                        if (classObj != null) {
-                            classList.add(classObj);
-                        }
-                    }
-                }
-            }
-            var course = new Course(
-                data.id, data.number, data.name, data.credits,
-                data.prereqs, data.coreq, data.electivesInGroup,
-                COLORS[colorIndex++],
-                classList,
-                data.description
+        start();
+        $("#generateMessage").text("Initializing...");
+        if (window.Worker) {
+            worker = new Worker("scripts/generate_worker.js");
+            // pass the worker all the data it will need
+            worker.postMessage(
+                JSON.stringify({
+                    getTimesFromStorage: getTimesFromStorage(),
+                    getCoursePrefsFromStorage: getCoursePrefsFromStorage(),
+                    creditMin: $("#creditMin").val(),
+                    creditGoal: $("#creditGoal").val(),
+                    creditMax: $("#creditMax").val(),
+                    getAdvancedFromStorage: getAdvancedFromStorage(),
+                    getCoursesFromStorage: getCoursesFromStorage(),
+                    jsonCourseData: jsonCourseData,
+                    jsonClassData: jsonClassData,
+                    getShowWeekends: getShowWeekends()
+                })
             );
-            courses.add(course);
+            // listen for changes in the worker's state
+            worker.onmessage = function(event) {
+                var data = JSON.parse(event.data);
+                if (data.type == "start") {
+                } else if (data.type == "progress") {
+                    middle(data.progress);
+                } else if (data.type == "finish") {
+                    schedules = data.schedules;
+                    console.log(data.message);
+                    finish();
+                }
+            };
+        } else {
+            alert("Your browser does not support JSWorkers");
         }
 
-        // start the generation in a worker
-        if (!window.Worker || true) {// if we can't run it in the background
-            start();
-            // hide the cancel button because it can't be cancelled
-            $("#generateCancel").addClass("hidden");
-            var generator = new ScheduleGenerator(courses, options,
-                preProcessFilter, processFilter, postProcessFilter,
-                rankingFilter);
-            console.log("Calculating...");
-            schedules = generator.generateSchedules(middle);
-            var message = "Found " + schedules.length + " schedules in " +
-                generator.getCalculationTime() + " seconds";
-            console.log(message);
-            alert(message);
-            finish();
-        } else {
-            // worker = new Worker("scripts/worker.js");
-            // worker.postMessage(JSON.stringify([courses, options]));
-            // var totalSchedules = 0,
-            //     $message = $("#generateMessage");
-            // worker.onmessage = function(event) {
-            //     console.log("Worker message received from worker");
-            //     var data = JSON.parse(event.data);
-            //     // how many schedules have either been made or have been ranked
-            //     var progress = parseInt(data[1]);
-            //     if (data[0] === "generating") {
-            //         workerRanking = false;
-            //     } else if (data[0] === "ranking") {
-            //         totalSchedules = progress;
-            //         workerRanking = true;
-            //     } else if (data[0] === "done") {
-            //         workerRanking = false;
-            //         finish();
-            //     }
-            //     if (!workerRanking) {
-            //         $message.text("Schedules Generated: " + progress);
-            //     } else {
-            //         $message.text("Ranking Progress: "
-            //             + (progress / totalSchedules).toFixed(2) + "%");
-            //     }
-            //     console.log(progress);
-            // }
-        }
         // before the beginning of generation
-        var $genStatus = $("#generateStatus");
-        function start() {
-            $("#generate").addClass("hidden");
-            $("#generateStatus").removeClass("hidden");
-            $("#scheduleData").addClass("hidden");
-        }
-        // whenever a point of progress (e.g. new schedule calculated) occurs
-        function middle(progress) {
-            $("#generateStatus").text("Schedules Generated: " + progress);
-        }
-        // when finished, show first, highest-ranked schedule
-        function finish() {
-            $("#scheduleOutput").removeClass("hidden");
-            $("#generateStatus").addClass("hidden");
-            $("#scheduleData").removeClass("hidden");
-            drawSchedule(schedules[0]);
-        }
     });
+    function start() {
+        $("#generate").addClass("hidden");
+        $("#generateStatus").removeClass("hidden");
+        $("#scheduleData").addClass("hidden");
+    }
+    // whenever a point of progress (e.g. new schedule calculated) occurs
+    function middle(progress) {
+        $("#generateMessage").text("Schedules Generated: " + progress);
+    }
+    // when finished, show first, highest-ranked schedule
+    function finish() {
+        $("#scheduleOutput").removeClass("hidden");
+        $("#generateStatus").addClass("hidden");
+        $("#scheduleData").removeClass("hidden");
+        drawSchedule(schedules[0]);
+    }
     $("#generateCancel").click(function() {
         console.log("Cancel Generating");
         if (worker) {
             worker.terminate();
             workerRanking = false;
+            step5Init();
         }
     });
 
@@ -155,6 +78,7 @@ $(function() {
     }
 
     function drawSchedule(schedule) {
+        schedule = scheduleFromStr(schedule);
         purgeSchedule();
         for (var i = 0; i < schedule.classes.getLength(); i++) {
             drawClass(schedule.classes.at(i));
@@ -264,59 +188,62 @@ $(function() {
         return str;
     }
 
-    const DAY_TO_INT = {"M": 1, "T": 2, "W": 3, "R": 4, "F": 5};
-    function sectionToClass(courseNumber, sectionObj) {
-        courseNumber = parseInt(courseNumber.substr(3)) + "";
-        var id = parseInt(courseNumber + sectionObj.section);
-        var times = [];
-        var professors = [], rooms = [];
-        var campus = "", building = "";
-        for (var m in sectionObj.meetings) {
-            var meeting = sectionObj.meetings[m];
-            // get some main variables out of the way
-            // campus = "";
-            var building = meeting.building;
-            if (professors.indexOf(meeting.professor) == -1) {
-                professors.push(meeting.professor);
+    function scheduleFromStr(scheduleStr) {
+        var newSchedule = new Schedule();
+        // set classes
+        var classesStr = scheduleStr.split("[")[1].split("]")[0];
+        var classIDs = classesStr.split(", ");
+        for (var i = 0; i < classIDs.length; i++) {
+            var theClass = classFromStr(classIDs[i]);
+            newSchedule.addClass(theClass);
+        }
+        // set credits
+        var creditsStr = scheduleStr.split("credits=")[1].split(",")[0];
+        newSchedule.credits = parseInt(creditsStr);
+        // set normalizedRanking
+        var rankingStr = scheduleStr.split("normalizedRanking=")[1]
+            .split(",")[0];
+        newSchedule.normalizedRanking = parseFloat(rankingStr);
+
+        return newSchedule;
+    }
+
+    function classFromStr(classStr) {
+        var sectionNum = classStr.substr(classStr.length - 2);
+        var courseNum = classStr.substr(0, classStr.length - 2);
+        // get course
+        var cData = getCoursesFromStorage();
+        var rawCourses = jsonCourseData[cData.major][cData.concentration];
+        var theCourse = null;
+        for (var i = 0; i < rawCourses.length; i++) {
+            if (rawCourses[i].number.indexOf(courseNum) == 0) {
+                theCourse = rawCourses[i];
+                if (!colorForCourse[theCourse.id]) {
+                    colorForCourse[theCourse.id] = COLORS[colorIndex++];
+                }
+                theCourse.color = colorForCourse[theCourse.id];
+                break;
             }
-            if (rooms.indexOf(meeting.room) == -1) {
-                rooms.push(meeting.room);
-            }
-            // convert meetings to times
-            var days = meeting.days;
-            loop1: while (days.length > 0) {
-                var day = DAY_TO_INT[days[0]];
-                days = days.substr(1);
-                var timeObj = {
-                    day: day,
-                    start: meeting.time.start,
-                    end: meeting.time.end
-                };
-                for (var t in times) {
-                    var time = times[t];
-                    if (time.day == timeObj.day
-                            && time.start.h == timeObj.start.h
-                            && time.start.m == timeObj.start.m
-                            && time.end.h == timeObj.end.h
-                            && time.end.m == timeObj.end.m) {
-                        continue loop1;
+        }
+        if (theCourse == null) return null;
+
+        // get the section data
+        rawCourses = jsonClassData;
+        var theSection = null;
+        loop1: for (var i in rawCourses) {
+            if (i.indexOf(courseNum) == 0) {
+                var sections = rawCourses[i];
+                for (var j = 0; j < sections.length; j++) {
+                    if (sections[j].section = sectionNum) {
+                        theSection = sections[j];
+                        break loop1;
                     }
                 }
-                times.push(timeObj);
             }
         }
-        var professorsStr = professors[0];
-        for (var i = 1; i < professors.length; i++) {
-            professorsStr += "; " + professors[i];
-        }
-        var roomsStr = rooms[0];
-        for (var i = 1; i < rooms.length; i++) {
-            roomsStr += "; " + rooms[i];
-        }
-        var section = sectionObj.section;
-        var seatsMax = sectionObj.seatsMax;
-        var seatsLeft = sectionObj.seatsLeft;
-        return new Class(id, null, times, professorsStr, section,
-            campus, building, roomsStr, seatsMax, seatsLeft);
+        if (theSection == null) return null;
+        var theClass = sectionToClass(courseNum, theSection);
+        theClass.course = theCourse;
+        return theClass;
     }
 });

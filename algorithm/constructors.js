@@ -40,11 +40,13 @@ function Schedule() {
         var str = "Schedule[";
         for (var i = 0; i < this.classes.getLength(); i++) {
             var theClass = this.classes.at(i);
-            str += theClass.id
-                    + ((theClass.course.name.indexOf("Lab") != -1) ? "L" : "")
-                    + ", ";
+            str += theClass.id + ", ";
         }
-        return str.substr(0, str.length - 2) + "]";
+        str = str.substr(0, str.length - 2) + "]{"
+            + "credits=" + this.credits + ", "
+            + "normalizedRanking=" + this.normalizedRanking
+            + "}";
+        return str;
     };
 }
 
