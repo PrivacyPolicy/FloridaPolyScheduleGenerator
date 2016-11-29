@@ -228,6 +228,16 @@ function step3Init() {
             }
         }
 
+        // if the course is offered this semester
+        var found = false;
+        for (var classNumber in jsonClassData) {
+            if (classNumber.indexOf(course.number) == 0) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) continue loop1;
+
         // must be okay
         addCoursePref(data, course);
     }
