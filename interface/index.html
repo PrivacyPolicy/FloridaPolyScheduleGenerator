@@ -154,10 +154,31 @@
 
                 <!-- Professors (favored/unfavored) -->
                 <div id=step4 class=step>
+                    <h1>Professor Preferences</h1>
+                    <div id=professorPrefs>
+                        <div class="professorPref template">
+                            <input type=radio name=professorPrefTemp
+                                   id=professorPrefTemp2>
+                            <label for=professorPrefTemp2 class=favored>
+                                ✓
+                            </label>
+                            <input type=radio name=professorPrefTemp
+                                   id=professorPrefTemp1 checked>
+                            <label for=professorPrefTemp1 class=neutral>
+                                —
+                            </label>
+                            <input type=radio name=professorPrefTemp
+                                   id=professorPrefTemp0>
+                            <label for=professorPrefTemp0 class=unfavored>
+                                ✕
+                            </label>
+                            <span class=professorPrefName>Test</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Show Schedules -->
-                <div id=step6 class=step>
+                <div id=step5 class=step>
                     <button id=generate>Generate</button>
                     <div id=scheduleOutput class="schedule hidden">
                         <div class=scheduleBackground>

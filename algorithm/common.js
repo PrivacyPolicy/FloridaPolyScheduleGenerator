@@ -1,4 +1,4 @@
-const DEBUG = false;
+const DEBUG = true;
 
 // days:
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -70,4 +70,13 @@ function sectionToClass(courseNumber, sectionObj) {
     var seatsLeft = sectionObj.seatsLeft;
     return new Class(id, null, times, professorsStr, section,
         campus, building, roomsStr, seatsMax, seatsLeft);
+}
+
+function getCourseWithID(courses, courseID) {
+    for (var i = 0; i < courses.length; i++) {
+        if (courses[i].id == courseID) {
+            return courses[i];
+        }
+    }
+    return null;
 }

@@ -322,6 +322,113 @@ function getCoursePrefsFromStorage() {
 
 
 
+
+// Step 4
+function step4Init() {
+    var professors = [];
+    var d = getCoursesFromStorage();
+    var rawCourses = jsonCourseData[d.major][d.concentration];
+    var coursePrefs = getCoursePrefsFromStorage();
+    for (var i in coursePrefs) {
+        var cData = getCourseWithID(rawCourses, i.split("-")[1]);
+        for (var j in jsonClassData) {
+            if (j.indexOf(cData.number) == 0) {
+                for (var k in jsonClassData[j]) {
+                    var meetings = jsonClassData[j][k].meetings;
+                    for (var l = 0; l < meetings.length; l++) {
+                        var profStr = meetings[l].professor;
+                        if (professors.indexOf(profStr) == -1) {
+                            professors.push(profStr);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    professors.sort(function(a, b) {
+        return a.toUpperCase().localeCompare(b.toUpperCase());
+    });
+
+    // use professors list, add checkboxes
+    purgeProfessorPrefs();
+    for (var i = 0; i < professors.length; i++) {
+        addProfessorPref(professors[i]);
+    }
+
+    // set up listeners
+    loadProfessorPrefsFromStorage();
+    saveProfessorPrefsToStorage();
+    $("#step4 input[type=radio]").click(function(event) {
+        saveProfessorPrefsToStorage();
+    });
+}
+
+function addProfessorPref(professor) {
+    var $professorPrefs = $("#professorPrefs");
+    var copy = $professorPrefs.children().get(0).cloneNode(true);
+    copy.id = "professorPref-" + professor;
+    var $copy = $(copy);
+    $copy.removeClass("template");
+    $copy.find(".professorPrefName").text(professor)
+        .attr("title", professor);
+    $copy.find("[name=professorPrefTemp]")
+        .attr("name", "professorPref" + professor);
+    $copy.find("[id*=Temp]").each(function(i, elem) {
+        elem.id = elem.id.split("Temp").join(
+            professor + Math.floor(i / 2));
+    });
+    $copy.find("[for*=Temp]").each(function(i, elem) {
+        $(elem).attr("for", $(elem).attr("for").split("Temp").join(
+            professor + Math.floor(i / 2)));
+    });
+    $professorPrefs.append($copy);
+}
+function purgeProfessorPrefs() {
+    var $professorPrefs = $("#professorPrefs");
+    $professorPrefs.html($professorPrefs.children().eq(0));
+}
+
+function saveProfessorPrefsToStorage() {
+    var object = {};
+    $(".professorPref:not(.template)").each(function(i, elem) {
+        var $elem = $(elem);
+        object[$elem.attr("id")] =
+            pref[$elem.find(":checked + label")[0].classList[0]];
+    });
+    localStorage[ID + "_" + STEP + "4"] = JSON.stringify(object);
+}
+function loadProfessorPrefsFromStorage() {
+    var data = getProfessorPrefsFromStorage();
+    if (!data) return {};
+    $(".professorPref:not(.template)").each(function(i, elem) {
+        var $elem = $(elem);
+        var thePref = data[$elem.attr("id")];
+        if (thePref == undefined) return;
+        if (thePref == pref.unacceptable) {
+            $elem.find(".unacceptable").click();
+        } else if (thePref == pref.unfavored) {
+            $elem.find(".unfavored").click();
+        } else if (thePref == pref.favored) {
+            $elem.find(".favored").click();
+        } else if (thePref == pref.required) {
+            $elem.find(".required").click();
+        } else { // pref == pref.neutral
+            $elem.find(".neutral").click();
+        }
+    });
+    return data;
+}
+function getProfessorPrefsFromStorage() {
+    try {
+        return JSON.parse(localStorage[ID + "_" + STEP + "4"]);
+    } catch (e) {
+        console.error(e);
+        return null;
+    }
+}
+
+
+
 // Step 5
 function step5Init() {
     $("#generate").removeClass("hidden");

@@ -71,6 +71,54 @@
 }
 
 /* Step 4 */
+.professorPref {
+    display: flex;
+    margin: 1em;
+}
+.professorPref > .professorPrefName {
+    padding: .2em;
+    margin: 0 .5em;
+}
+.professorPref > input[type=radio] {
+    display: none;
+}
+.professorPref > input[type=radio] + label {
+    display: inline-block;
+    text-align: center;
+    border-radius: 5px;
+    border: 1px solid gray;
+    width: 2em;
+    padding: .2em;
+    background: lightgray;
+}
+.professorPref > input[type=radio] + label.favored {
+    border-right: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.professorPref > input[type=radio] + label.neutral {
+    border-radius: 0;
+}
+.professorPref > input[type=radio] + label.unfavored {
+    border-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+.professorPref > input[type=radio]:checked + label.unfavored {
+    background: red;
+}
+.professorPref > input[type=radio]:checked + label.neutral {
+    background: yellow;
+}
+.professorPref > input[type=radio]:checked + label.favored {
+    background: lime;
+}
+.professorPref > input[type=radio]:focus + label {
+    border-color: blue;
+    border-width: 2px;
+}
+
+
 /* Step 5 */
 /* Step 6 */
 button#generate {

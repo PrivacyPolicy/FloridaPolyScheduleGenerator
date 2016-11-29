@@ -218,7 +218,7 @@ var rankingFilter = function(options, schedule) {
         if (profPref != undefined) {
             if (profPref == pref.favored) {
                 profRank--;
-            } else if (profPref == pref.favored) {
+            } else if (profPref == pref.unfavored) {
                 profRank++;
             }
         }

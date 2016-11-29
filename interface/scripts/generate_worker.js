@@ -39,6 +39,15 @@ onmessage = function(event) {
         var thePref = dataCoursePrefs[i];
         options.setCoursePreference(id, thePref);
     }
+
+    // load professor preferences from step 4
+    var dataProfessorPrefs = data["getProfessorPrefsFromStorage"];
+    for (var i in dataProfessorPrefs) {
+        var prof = i;;
+        prof = prof.split("-")[1];
+        options.setProfessorPreference(prof, dataProfessorPrefs[i]);
+    }
+
     // load credit range prefs from step ?
     options.setCreditMin(parseInt(data["creditMin"]));
     options.setCreditFavoredValue(parseInt(data["creditGoal"]));
@@ -148,13 +157,4 @@ function cancelWorker() {
         worker.terminate();
         workerRanking = false;
     }
-}
-
-function getCourseWithID(courses, courseID) {
-    for (var i = 0; i < courses.length; i++) {
-        if (courses[i].id == courseID) {
-            return courses[i];
-        }
-    }
-    return null;
 }

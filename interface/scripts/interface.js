@@ -50,6 +50,9 @@ function toStep(step) {
         case 3:
             step3Init();
             break;
+        case 4:
+            step4Init();
+            break;
         case 5:
             step5Init();
             break;

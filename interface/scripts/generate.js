@@ -22,7 +22,8 @@ $(function() {
                     getCoursesFromStorage: getCoursesFromStorage(),
                     jsonCourseData: jsonCourseData,
                     jsonClassData: jsonClassData,
-                    getShowWeekends: getShowWeekends()
+                    getShowWeekends: getShowWeekends(),
+                    getProfessorPrefsFromStorage: getProfessorPrefsFromStorage()
                 })
             );
             // listen for changes in the worker's state
@@ -222,14 +223,5 @@ $(function() {
         newSchedule.ranking = scheduleObj.ranking;
         newSchedule.normalizedRanking = scheduleObj.normalizedRanking;
         return newSchedule;
-    }
-
-    function getCourseWithID(courses, courseID) {
-        for (var i = 0; i < courses.length; i++) {
-            if (courses[i].id == courseID) {
-                return courses[i];
-            }
-        }
-        return null;
     }
 });
