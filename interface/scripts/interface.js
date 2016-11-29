@@ -33,10 +33,12 @@ function toStep(step) {
         .attr("data-page", step + 1);
 
     // handle the end of the transition
-    $("#steps").bind("transitionend", handleTransitionEnd);
-    function handleTransitionEnd(event) {
-        document.location.hash = "step" + (getCurStep() + 1);
-        $("#steps").unbind("transitionend", handleTransitionEnd);
+    if (DEBUG) {
+        $("#steps").bind("transitionend", handleTransitionEnd);
+        function handleTransitionEnd(event) {
+            document.location.hash = "step" + (getCurStep() + 1);
+            $("#steps").unbind("transitionend", handleTransitionEnd);
+        }
     }
 
     // update buttons

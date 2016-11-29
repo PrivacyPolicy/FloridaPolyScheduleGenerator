@@ -73,9 +73,11 @@ $(function() {
             $("#loading").addClass("hidden");
 
             // Go to the url's recomended step
-            var hash = parseInt(document.location.hash.substr(5));
-            if (isNaN(hash)) hash = 1;
-            toStep(hash - 1);
+            if (DEBUG) {
+                var hash = parseInt(document.location.hash.substr(5));
+                if (isNaN(hash)) hash = 1;
+                toStep(hash - 1);
+            }
         }
     }
 
