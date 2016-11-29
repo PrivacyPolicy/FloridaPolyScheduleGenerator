@@ -45,6 +45,7 @@ $(function() {
         $("#generate").addClass("hidden");
         $("#generateStatus").removeClass("hidden");
         $("#scheduleData").addClass("hidden");
+        $("#generateCancel").text("Cancel");
     }
     // whenever a point of progress (e.g. new schedule calculated) occurs
     function middle(progress) {
@@ -52,13 +53,20 @@ $(function() {
     }
     // when finished, show first, highest-ranked schedule
     function finish() {
-        $("#scheduleOutput").removeClass("hidden");
-        $("#generateStatus").addClass("hidden");
-        $("#scheduleData").removeClass("hidden");
-        for (var i = 0; i < schedules.length; i++) {
-            schedules[i] = scheduleFromObj(schedules[i]);
+        if (schedules.length > 0) {
+            $("#scheduleOutput").removeClass("hidden");
+            $("#generateStatus").addClass("hidden");
+            $("#scheduleData").removeClass("hidden");
+            for (var i = 0; i < schedules.length; i++) {
+                schedules[i] = scheduleFromObj(schedules[i]);
+            }
+            drawSchedule(schedules[0]);
+        } else {
+            // alert("No schedules found that mach your criteria.");
+            $("#generateMessage").text("No schedules found that match your "
+                + "criteria.");
+            $("#generateCancel").text("Okay");
         }
-        drawSchedule(schedules[0]);
     }
     $("#generateCancel").click(function() {
         console.log("Cancel Generating");
