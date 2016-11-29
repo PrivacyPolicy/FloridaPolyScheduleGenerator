@@ -77,6 +77,8 @@ $(function() {
                 var hash = parseInt(document.location.hash.substr(5));
                 if (isNaN(hash)) hash = 1;
                 toStep(hash - 1);
+            } else {
+                toStep(0);
             }
         }
     }

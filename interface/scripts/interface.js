@@ -56,6 +56,12 @@ function toStep(step) {
         default:
             break;
     }
+
+    // preventing tabbing to other pages
+    $("button, input").attr("tabindex", -1);
+    $("#step" + (step + 1)).find("button, input").each(function(i, elem) {
+        $(elem).attr("tabindex", 0);
+    });
 }
 
 function nextStep() {
