@@ -185,6 +185,7 @@ function addEventListeners() {
             origHeight = parent.height();
             origWidth = parent.width();
             down(event, l, t);
+            highlight($elem.parentsUntil(".scheduleForeground").last());
         } else if ($elem.is(".handle.bottom")) {
             moveRespond = moveHandleBtmRespond;
             endRespond = endHandleBtmRespond;
@@ -195,6 +196,7 @@ function addEventListeners() {
             origHeight = parent.height();
             origWidth = parent.width();
             down(event, l, t);
+            highlight($elem.parentsUntil(".scheduleForeground").last());
         } else if ($elem.is(".timeSlot")) {
             moveRespond = moveSlotRespond;
             endRespond = endSlotRespond;
