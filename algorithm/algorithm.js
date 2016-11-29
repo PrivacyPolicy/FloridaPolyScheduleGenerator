@@ -50,7 +50,7 @@ function ScheduleGenerator(
             this.recGenerateSchedules(buildSchedule, 0, progressCallback);
             //this.recGenerateSchedules(buildSchedule, 1, progressCallback);
         }
-        this.postProcessSchedules();
+        this.postProcessSchedules(progressCallback);
         this.calculationTime = (Date.now() - this.calculationTime) / 1000;
         return this.schedules;
     };
@@ -89,8 +89,9 @@ function ScheduleGenerator(
     };
 
     // remove any residual classes that passed but are overall bad
-    this.postProcessSchedules = function() {
+    this.postProcessSchedules = function(callback) {
         var maxRank = {}, minRank = {};
+        callback("startedRanking");
         // var scheduleStrs = [];
         for (var i = this.schedules.length - 1; i >= 0; i--) {
             var schedule = this.schedules[i];

@@ -31,6 +31,8 @@ $(function() {
                 if (data.type == "start") {
                 } else if (data.type == "progress") {
                     middle(data.progress);
+                } else if (data.type == "startedRanking") {
+                    middle("startedRanking");
                 } else if (data.type == "finish") {
                     schedules = data.schedules;
                     console.log(data.message);
@@ -49,7 +51,13 @@ $(function() {
     }
     // whenever a point of progress (e.g. new schedule calculated) occurs
     function middle(progress) {
-        $("#generateMessage").text("Schedules Generated: " + progress);
+        if (typeof progress == "number") {
+            $("#generateMessage").text("Schedules Generated: " + progress);
+        } else if (typeof progress == "string") {
+            if (progress == "startedRanking") {
+                $("#generateMessage").text("Ranking...");
+            }
+        }
     }
     // when finished, show first, highest-ranked schedule
     function finish() {

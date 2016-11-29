@@ -109,10 +109,18 @@ function start() {
 }
 // whenever a point of progress (i.e. new schedule calculated) occurs
 function middle(progress) {
-    postMessage(JSON.stringify({
-        type: "progress",
-        progress: progress
-    }));
+    if (typeof progress == "number") {
+        postMessage(JSON.stringify({
+            type: "progress",
+            progress: progress
+        }));
+    } else if (typeof progress == "string") {
+        if (progress == "startedRanking") {
+            postMessage(JSON.stringify({
+                type: "startedRanking"
+            }));
+        }
+    }
 }
 // when finished, show first, highest-ranked schedule
 function finish(message) {
