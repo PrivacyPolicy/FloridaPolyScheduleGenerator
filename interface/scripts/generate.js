@@ -55,6 +55,9 @@ $(function() {
         $("#scheduleOutput").removeClass("hidden");
         $("#generateStatus").addClass("hidden");
         $("#scheduleData").removeClass("hidden");
+        for (var i = 0; i < schedules.length; i++) {
+            schedules[i] = scheduleFromObj(schedules[i]);
+        }
         drawSchedule(schedules[0]);
     }
     $("#generateCancel").click(function() {
@@ -67,7 +70,6 @@ $(function() {
     });
 
     function drawSchedule(schedule) {
-        schedule = scheduleFromObj(schedule);
         purgeSchedule();
         for (var i = 0; i < schedule.classes.getLength(); i++) {
             drawClass(schedule.classes.at(i));
@@ -163,8 +165,10 @@ $(function() {
         // else:
         var lastTime = times[0];
         for (var i = 1; i < times.length; i++) {
-            if (lastTime.start == times[i].start &&
-                    lastTime.end == times[i].end) {
+            if (lastTime.start.h == times[i].start.h
+                    && lastTime.start.m == times[i].start.m
+                    && lastTime.end.h == times[i].end.h
+                    && lastTime.end.m == times[i].end.m) {
                 str = str.split(" ")[0]
                     + DAY_CHARS[times[i].day] + " "
                     + str.split(" ")[1];
@@ -211,44 +215,5 @@ $(function() {
             }
         }
         return null;
-    }
-
-    function classFromStr(classStr) {
-        var sectionNum = classStr.substr(classStr.length - 2);
-        var courseNum = classStr.substr(0, classStr.length - 2);
-        // get course
-        var cData = getCoursesFromStorage();
-        var rawCourses = jsonCourseData[cData.major][cData.concentration];
-        var theCourse = null;
-        for (var i = 0; i < rawCourses.length; i++) {
-            if (rawCourses[i].number.indexOf(courseNum) == 0) {
-                theCourse = rawCourses[i];
-                if (!colorForCourse[theCourse.id]) {
-                    colorForCourse[theCourse.id] = COLORS[colorIndex++];
-                }
-                theCourse.color = colorForCourse[theCourse.id];
-                break;
-            }
-        }
-        if (theCourse == null) return null;
-
-        // get the section data
-        rawCourses = jsonClassData;
-        var theSection = null;
-        loop1: for (var i in rawCourses) {
-            if (i.indexOf(courseNum) == 0) {
-                var sections = rawCourses[i];
-                for (var j = 0; j < sections.length; j++) {
-                    if (sections[j].section = sectionNum) {
-                        theSection = sections[j];
-                        break loop1;
-                    }
-                }
-            }
-        }
-        if (theSection == null) return null;
-        var theClass = sectionToClass(courseNum, theSection);
-        theClass.course = theCourse;
-        return theClass;
     }
 });
